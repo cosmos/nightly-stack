@@ -1,0 +1,6 @@
+name: "Nightly builds of the interchain stack"
+on: 
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
