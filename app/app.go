@@ -140,8 +140,8 @@ const appName = "WasmApp"
 
 // We pull these out so we can set them with LDFLAGS in the Makefile
 var (
-	NodeDir      = ".wasmd"
-	Bech32Prefix = "wasm"
+	NodeDir      = ".merlind"
+	Bech32Prefix = "merlin"
 )
 
 // These constants are derived from the above variables.
