@@ -1,4 +1,10 @@
 name: Nightly builds of SimApp (Cosmos-SDK)
+# CI (Continuous Integration) workflow that creates nightly builds of SimApp (Cosmos-SDK).
+# 1. Builds multi-arch and multiples major versions in parallel
+# 2. Checks that the output binary is working correctly by initiating a testchain and verifying that blocks are procuced
+# OUTPUTS:
+# - One github workflow artefact for each binary
+# - One multi-arch tag for each major version on the container image
 on:
   schedule:
     - cron: 0 0 * * * # Every day at 0:00 UTC
