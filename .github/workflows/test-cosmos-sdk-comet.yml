@@ -1,5 +1,5 @@
 name: Test Cosmos-SDK + Comet
-# Test workflow that creates nightly builds of SimApp (Cosmos-SDK) with latest commits on cometBFT (main branch)..
+# Test workflow that creates nightly builds of SimApp (Cosmos-SDK) with latest commits on cometBFT (main branch)
 # 1. Builds multi-arch
 # 2. Checks that the output binary is working correctly by initiating a testchain and verifying that blocks are procuced
 
