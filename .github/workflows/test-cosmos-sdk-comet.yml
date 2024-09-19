@@ -1,0 +1,135 @@
+name: Test Cosmos-SDK + Comet
+# Test workflow that creates nightly builds of SimApp (Cosmos-SDK) with latest commits on cometBFT (main branch)
+# 1. Builds multi-arch
+# 2. Checks that the output binary is working correctly by initiating a testchain and verifying that blocks are procuced
+
+on:
+  schedule:
+    - cron: 0 0 * * * # Every day at 0:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_NAME: Cosmos-SDK@main + CometBFT@main
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  build-cosmos-sdk-comet:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: cosmos/cosmos-sdk
+          ref: main
+          token: ${{ github.token }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          check-latest: true
+
+      - name: Get cometbft v1.x SHA
+        id: cometbft
+        run: |
+          head=$(git ls-remote https://github.com/cometbft/cometbft.git v1.x | awk '{print $1}')
+          echo "head=$head" >> $GITHUB_OUTPUT
+
+      - name: Go get cometbft@HEAD
+        id: build
+        run: |
+          cd simapp
+          go get github.com/cometbft/cometbft@${{ steps.cometbft.outputs.head }}
+          go mod tidy
+
+      - name: Build application
+        run: |
+          GOARCH=${{ matrix.go-arch }} make install
+      - name: Run and monitor application
+        shell: bash
+        # no arm64 runners as of now : https://github.com/orgs/community/discussions/19197
+        if: ${{ matrix.go-arch == 'amd64' }}
+        run: |
+          set -oue pipefail
+          set -x
+
+          # Set the timeout to 60 seconds
+          TIMEOUT=60
+          START_TIME=$(date +%s)
+
+          make init-simapp
+          simd start > ./output.log 2>1 &
+          APP_PID=$!
+
+
+          while true; do
+            CURRENT_TIME=$(date +%s)
+            ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
+
+            if [ $ELAPSED_TIME -ge $TIMEOUT ]; then
+              echo "Timeout reached. Application did not produce the success pattern within 60 seconds."
+              kill $APP_PID
+              cat ./output.log
+              exit 1
+            fi
+
+            # Check that 4th block is produced to validate the application
+            if simd query block-results 4; then
+              echo "Block #4 has been committed. Application is working correctly."
+              kill $APP_PID
+              exit 0
+            else
+              echo "Block height is not greater than 4."
+            fi
+
+            sleep 3
+          done
+
+  build-cosmos-sdk-comet-notify-success:
+    needs: build-cosmos-sdk-comet
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get previous workflow status
+        uses: cosmos/cosmos-sdk/.github/actions/last-workflow-status@main
+        id: last_status
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify Slack on success
+        if: ${{ steps.last_status.outputs.last_status == 'failure' }}
+        uses: rtCamp/action-slack-notify@v2.3.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: nightly-stack-build
+          SLACK_USERNAME: Nightly Builds
+          SLACK_ICON_EMOJI: ":white_check_mark:"
+          SLACK_COLOR: good
+          SLACK_MESSAGE: ${{ env.RELEASE_NAME }} is passing
+          SLACK_FOOTER: ""
+
+  build-cosmos-sdk-comet-notify-failure:
+    permissions:
+      contents: none
+    needs: build-cosmos-sdk-comet
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    steps:
+      - name: Notify Slack on failure
+        uses: rtCamp/action-slack-notify@v2.3.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: nightly-stack-build
+          SLACK_USERNAME: Nightly Builds
+          SLACK_ICON_EMOJI: ":skull:"
+          SLACK_COLOR: danger
+          SLACK_MESSAGE: ${{ env.RELEASE_NAME }} is failing
+          SLACK_FOOTER: ""
