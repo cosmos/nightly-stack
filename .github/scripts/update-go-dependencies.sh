@@ -34,10 +34,9 @@ get_and_update_module() {
 
     go mod edit -replace=$module=$module@$pseudo_version
 
-    if ! go mod download $module@$pseudo_version; then
-        echo "Download failed. Trying with a different commit."
-        return 1
-    fi
+    # if ! go mod download $module@$pseudo_version; then
+    #     return 1
+    # fi
 
     return 0
 }
@@ -50,25 +49,30 @@ echo "cosmos/cosmos-sdk main latest_commit: $latest_commit_main"
 latest_commit_branch=$(get_latest_commit "cosmos/cosmos-sdk" "$COSMOSSDK_BRANCH")
 echo "cosmos/cosmos-sdk $COSMOSSDK_BRANCH latest_commit: $latest_commit_branch"
 
-# Version override logic
+# Parse every module in go.mod, and update dependencies according to logic
 for module in $modules; do
 
     echo "module: $module"
 
+    # Checking cosmos-sdk modules
     if [[ $module =~ "cosmossdk.io" ]]; then
-        if ! get_and_update_module "$latest_commit_branch"; then
-            # If it fails, get the from main
+        # Force specific modules to HEAD of main instead of release
+        if [[ $module =~ "depinject" ]] || [[ $module =~ "log" ]] || [[ $module =~ "math" ]]; then
             if ! get_and_update_module "$latest_commit_main"; then
-                echo "Failed to update module after trying $COSMOSSDK_BRANCH and main."
+                echo "Failed to update module $module after trying main."
                 exit 1
+            fi
+        else
+            if ! get_and_update_module "$latest_commit_branch"; then
+                echo "Failed to update module $module after trying $COSMOSSDK_BRANCH."
             fi
         fi
     elif [[ $module == "github.com/cosmos/cosmos-sdk" ]]; then
         # modules that need to follow HEAD on release branch
-        pseudo_version=$(get_pseudo_version "github.com/cosmos/cosmos-sdk" $latest_commit_branch)
-        echo "Updating $module to pseudo-version $pseudo_version"
-        go mod edit -replace=$module=$module@$pseudo_version
-        go mod download $module@$pseudo_version
+        if ! get_and_update_module "$latest_commit_branch"; then
+            echo "Failed to update module $module after trying $COSMOSSDK_BRANCH."
+            exit 1
+        fi
     fi
 done
 

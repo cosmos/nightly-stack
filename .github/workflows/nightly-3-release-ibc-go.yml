@@ -9,6 +9,8 @@ on:
   schedule:
     - cron: 0 0 * * * # Every day at 0:00 UTC
   workflow_dispatch:
+  pull_request:
+
 
 permissions:
   packages: write
@@ -16,19 +18,16 @@ permissions:
 
 env:
   RELEASE_NAME: IBC-go@main + cosmos-sdk modules@HEAD
+  COSMOSSDK_BRANCH: refs/heads/release/v0.50.x
 
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:
-  build-wfl3:
+
+  update-dependencies:
     runs-on: ubuntu-latest
-    outputs:
-      date: ${{ steps.archive.outputs.date }}
-    strategy:
-      matrix:
-        go-arch: [amd64, arm64]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,10 +50,56 @@ jobs:
           cd ibc-go/simapp
           ../../nightly-stack/.github/scripts/update-go-dependencies.sh
 
-      - name: DEBUG update-go-dependencies.sh
+      - name: show output of modified go.sum and go.mod
         run: |
+          echo "############"
+          echo "# go.mod"
+          echo "############"
           cat ibc-go/simapp/go.mod
+          echo -e "\n\n"
+          echo "############"
+          echo "# go.mod"
+          echo "############"
           cat ibc-go/simapp/go.sum
+
+      - name: Upload go.mod and go.sum
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-files
+          path: |
+            ibc-go/simapp/go.mod
+            ibc-go/simapp/go.sum
+
+  build-ibc:
+    runs-on: ubuntu-latest
+    needs: update-dependencies
+    outputs:
+      date: ${{ steps.archive.outputs.date }}
+    strategy:
+      matrix:
+        go-arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: cosmos/ibc-go
+          ref: main
+          token: ${{ github.token }}
+          path: ibc-go
+
+      - uses: actions/checkout@v4
+        with:
+          path: nightly-stack
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          check-latest: true
+
+      - name: Download go.mod and go.sum
+        uses: actions/download-artifact@v4
+        with:
+          name: go-files
+          path: ibc-go/simapp
 
       - name: Create application binary
         id: build
@@ -216,7 +261,7 @@ jobs:
   merge:
     name: Merge cosmos-sdk
     runs-on: ubuntu-latest
-    needs: [build-wfl3]
+    needs: [build-ibc]
     if: ${{ always() }}
     steps:
       - name: Set variables
