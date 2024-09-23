@@ -1,0 +1,13 @@
+---
+app: ibc-go
+repository: github.com/cosmos/ibc-go
+path: simapp
+build_artifacts: true
+channels:
+  - name: main
+    platforms: ["linux/amd64","linux/arm64"]
+    branch: main
+    update_modules: true
+    tests:
+      enabled: true
+      type: web

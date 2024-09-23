@@ -38,13 +38,16 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
 
         # App Name
         toBuild = {}
-        if channel.get("stable", False):
-            toBuild["name"] = meta["app"]
-        else:
-            toBuild["name"] = "-".join([meta["app"], channel["name"]])
+        toBuild["name"] = meta["app"]
+
+        toBuild["repository"] = meta["repository"]
+        toBuild["path"] = meta["path"]
+        toBuild["branch"] = channel["branch"]
+        toBuild["update_modules"] = channel["update_modules"]
+        toBuild["build_artifacts"] = meta["build_artifacts"]
 
         # Container Tags
-        toBuild["tags"] = [channel,f"{channel}-mods"]
+        toBuild["tags"] = [channel]
 
         # Platform Metadata
         for platform in channel["platforms"]:
@@ -59,6 +62,9 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
 
             platformToBuild = {}
             platformToBuild["name"] = toBuild["name"]
+            platformToBuild["repository"] = toBuild["repository"]
+            platformToBuild["path"] = toBuild["path"]
+            platformToBuild["branch"] = toBuild["branch"]
             platformToBuild["platform"] = platform
             platformToBuild["target_os"] = target_os
             platformToBuild["target_arch"] = target_arch
@@ -77,6 +83,9 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
             platformToBuild["goss_args"] = "tail -f /dev/null" if channel["tests"].get("type", "web") == "cli" else ""
 
             platformToBuild["tests_enabled"] = channel["tests"]["enabled"] and platform in TESTABLE_PLATFORMS
+
+            platformToBuild["build_artifacts"] = meta["build_artifacts"]
+            platformToBuild["update_modules"] = channel["update_modules"]
 
             appsToBuild["appsPlatforms"].append(platformToBuild)
         appsToBuild["apps"].append(toBuild)
