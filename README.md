@@ -11,6 +11,7 @@ This repository contains the nightly builds of the Interchain Stack. The Interch
 - Dependencies:
   - cosmos-sdk release/v0.50.x
   - cosmos-sdk release/v0.52.x
+  - cometbft main
 - Outputs:
   - Workflow artifacts
   - Container image

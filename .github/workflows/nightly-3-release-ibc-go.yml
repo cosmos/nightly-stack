@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
 
-  update-dependencies:
+  update-dependencies-ibc:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -72,7 +72,7 @@ jobs:
 
   build-ibc:
     runs-on: ubuntu-latest
-    needs: update-dependencies
+    needs: update-dependencies-ibc
     outputs:
       date: ${{ steps.archive.outputs.date }}
     strategy:
@@ -104,7 +104,9 @@ jobs:
       - name: Create application binary
         id: build
         run: |
-          cd ibc-go
+          cd ibc-go/simapp
+          go mod tidy
+          cd ..
           GOARCH=${{ matrix.go-arch }} make build
           echo "gobin=$(go env GOPATH)/bin" >> $GITHUB_OUTPUT
 

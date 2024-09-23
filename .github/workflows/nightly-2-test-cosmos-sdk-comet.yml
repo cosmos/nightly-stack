@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-cosmos-sdk-comet:
+  build-cosmossdk-comet:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -92,8 +92,8 @@ jobs:
             sleep 3
           done
 
-  build-cosmos-sdk-comet-notify-success:
-    needs: build-cosmos-sdk-comet
+  build-cosmossdk-comet-notify-success:
+    needs: build-cosmossdk-comet
     runs-on: ubuntu-latest
     if: ${{ success() }}
     steps:
@@ -116,7 +116,7 @@ jobs:
           SLACK_MESSAGE: ${{ env.RELEASE_NAME }} is passing
           SLACK_FOOTER: ""
 
-  build-cosmos-sdk-comet-notify-failure:
+  build-cosmossdk-comet-notify-failure:
     permissions:
       contents: none
     needs: build-cosmos-sdk-comet

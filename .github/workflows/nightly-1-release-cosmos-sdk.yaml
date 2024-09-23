@@ -9,6 +9,8 @@ on:
   schedule:
     - cron: 0 0 * * * # Every day at 0:00 UTC
   workflow_dispatch:
+  pull_request:
+
 
 permissions:
   packages: write
@@ -22,31 +24,101 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-cosmos-sdk:
+  update-dependencies-cosmossdk:
     runs-on: ubuntu-latest
-    outputs:
-      date: ${{ steps.archive.outputs.date }}
+    continue-on-error: true
     strategy:
       matrix:
-        go-arch: [amd64, arm64]
-        major-version: [v0.50.x, v0.52.x]
+        major-version: [main, v0.50.x, v0.52.x]
+    outputs:
+      major-version: ${{ toJson(matrix.major-version) }}
     steps:
       - uses: actions/checkout@v4
         with:
           repository: cosmos/cosmos-sdk
-          ref: release/${{ matrix.major-version }}
+          ref: ${{ matrix.major-version == 'main' && 'main' || format('refs/heads/release/{0}', matrix.major-version) }}
           token: ${{ github.token }}
           path: cosmos-sdk
+
+      - uses: actions/checkout@v4
+        with:
+          path: nightly-stack
 
       - uses: actions/setup-go@v5
         with:
           go-version: "1.23"
           check-latest: true
 
+      - name: Update cosmos-sdk modules to HEAD/main
+        # Disable dependencies updates for v0.52.x
+        if: matrix.major-version != 'v0.52.x'
+        run: |
+          cd cosmos-sdk/simapp
+          COSMOSSDK_BRANCH=${{ matrix.major-version == 'main' && 'main' || format('refs/heads/release/{0}', matrix.major-version) }} ../../nightly-stack/.github/scripts/update-go-dependencies.sh
+
+      - name: show output of modified go.sum and go.mod
+        run: |
+          echo "############"
+          echo "# go.mod"
+          echo "############"
+          cat cosmos-sdk/simapp/go.mod
+          echo -e "\n\n"
+          echo "############"
+          echo "# go.mod"
+          echo "############"
+          cat cosmos-sdk/simapp/go.sum
+
+      - name: Upload go.mod and go.sum
+        # Disable dependencies updates for v0.52.x
+        if: matrix.major-version != 'v0.52.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-files-${{ matrix.major-version }}
+          path: |
+            cosmos-sdk/simapp/go.mod
+            cosmos-sdk/simapp/go.sum
+
+  build-cosmossdk:
+    runs-on: ubuntu-latest
+    needs: update-dependencies-cosmossdk
+    continue-on-error: true
+    outputs:
+      date: ${{ steps.archive.outputs.date }}
+    strategy:
+      matrix:
+        go-arch: [amd64, arm64]
+        major-version: [main, v0.50.x, v0.52.x]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: cosmos/cosmos-sdk
+          ref: ${{ matrix.major-version == 'main' && 'main' || format('refs/heads/release/{0}', matrix.major-version) }}
+          token: ${{ github.token }}
+          path: cosmos-sdk
+
+      - uses: actions/checkout@v4
+        with:
+          path: nightly-stack
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          check-latest: true
+
+      - name: Download go.mod and go.sum
+        uses: actions/download-artifact@v4
+        # Disable dependencies updates for v0.52.x
+        if: matrix.major-version != 'v0.52.x'
+        with:
+          name: go-files-${{ matrix.major-version }}
+          path: cosmos-sdk/simapp
+
       - name: Create application binary
         id: build
         run: |
-          cd cosmos-sdk
+          cd cosmos-sdk/simapp
+          go mod tidy
+          cd ../
           GOARCH=${{ matrix.go-arch }} make install
           echo "gobin=$(go env GOPATH)/bin" >> $GITHUB_OUTPUT
 
@@ -142,10 +214,6 @@ jobs:
           echo "image_name=${image_name}" >> $GITHUB_OUTPUT
           echo "outputs=${outputs}" >> $GITHUB_OUTPUT
 
-      - uses: actions/checkout@v4
-        with:
-          path: nightly-stack
-
       - uses: actions/download-artifact@v4
         with:
           name: ${{ env.RELEASE_NAME }}-${{ matrix.major-version }}-${{ env.date }}-${{ matrix.go-arch }}
@@ -207,12 +275,11 @@ jobs:
   merge:
     name: Merge cosmos-sdk
     runs-on: ubuntu-latest
-    needs: [build-cosmos-sdk]
+    needs: [build-cosmossdk]
     if: ${{ always() }}
     strategy:
       matrix:
-        major-version: [v0.50.x, v0.52.x]
-      fail-fast: false
+        major-version: [main, v0.50.x, v0.52.x]
     steps:
       - name: Set variables
         id: variables
@@ -294,7 +361,7 @@ jobs:
         shell: bash
         run: exit 1
 
-  sims-notify-success:
+  build-cosmossdk-notify-success:
     needs: merge
     runs-on: ubuntu-latest
     if: ${{ success() }}
@@ -318,7 +385,7 @@ jobs:
           SLACK_MESSAGE: ${{ env.RELEASE_NAME }} is passing
           SLACK_FOOTER: ""
 
-  sims-notify-failure:
+  build-cosmossdk-notify-failure:
     permissions:
       contents: none
     needs: merge
