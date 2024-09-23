@@ -1,0 +1,18 @@
+---
+app: cosmos-sdk
+channels:
+  - name: main
+    platforms: ["linux/amd64","linux/arm64"]
+    tests:
+      enabled: true
+      type: web
+  - name: v0.50.x
+    platforms: ["linux/amd64","linux/arm64"]
+    tests:
+      enabled: true
+      type: web
+  - name: v0.52.x
+    platforms: ["linux/amd64","linux/arm64"]
+    tests:
+      enabled: true
+      type: web
