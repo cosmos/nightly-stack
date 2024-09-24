@@ -3,7 +3,7 @@
     app:        #AppName
     repository: string
     path:       string
-    build_command: string
+    fetch_full_history?: bool
     publish_artifacts: bool
     channels: [...#Channels]
 }
@@ -12,11 +12,12 @@
     name:     #ChannelName
     platforms: [...#Platforms]
     branch:    string
-    update_modules?: bool
-    tests: {
+    container_tag_name: string
+    update_modules: {
         enabled: bool
-        command: string
+        cosmossdk_branch?: string
     }
+    tests_enabled: bool
 }
 
 #AppName:     string & !="" & =~"^[a-zA-Z0-9_-]+$"

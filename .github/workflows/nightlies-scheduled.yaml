@@ -34,6 +34,7 @@ jobs:
     with:
       # appsToBuild: ${{ inputs.appsToBuild }}
       appsToBuild: all
+      publishArtifacts: true
       sendNotifications: true
 
   # render-readme:

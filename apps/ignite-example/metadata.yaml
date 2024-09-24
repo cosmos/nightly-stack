@@ -1,14 +1,16 @@
 ---
 app: ignite-example
-repository: ignite/example
+repository: auricom/example
 path: ./
-build_command: go install
+fetch_full_history: true
 publish_artifacts: true
 channels:
   - name: master
-    platforms: ["linux/amd64","linux/arm64"]
+    # platforms: ["linux/amd64","linux/arm64"]
+    platforms: ["linux/amd64"]
     branch: master
-    update_modules: true
-    tests:
-      enabled: true
-      command: make init-simapp && simd start
+    container_tag_name: master
+    update_modules:
+      enabled: false
+      cosmossdk_branch: refs/heads/release/v0.50.x
+    tests_enabled: false

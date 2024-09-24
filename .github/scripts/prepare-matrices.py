@@ -39,12 +39,14 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
         # App Name
         toBuild = {}
         toBuild["name"] = meta["app"]
+        toBuild["channel"] = channel["name"]
+        toBuild["update_modules_enabled"] = channel["update_modules"]["enabled"]
+        toBuild["container_tag_name"] = channel["container_tag_name"]
 
         toBuild["repository"] = meta["repository"]
         toBuild["path"] = meta["path"]
         toBuild["branch"] = channel["branch"]
         toBuild["update_modules"] = channel["update_modules"]
-        toBuild["build_command"] = meta["build_command"]
         toBuild["publish_artifacts"] = meta["publish_artifacts"]
 
         # Container Tags
@@ -52,9 +54,6 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
 
         # Platform Metadata
         for platform in channel["platforms"]:
-
-            if platform not in TESTABLE_PLATFORMS and not forRelease:
-                continue
 
             toBuild.setdefault("platforms", []).append(platform)
 
@@ -66,6 +65,8 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
             platformToBuild["repository"] = toBuild["repository"]
             platformToBuild["path"] = toBuild["path"]
             platformToBuild["branch"] = toBuild["branch"]
+            if meta["fetch_full_history"]:
+                platformToBuild["fetch_full_history"] = meta["fetch_full_history"]
             platformToBuild["platform"] = platform
             platformToBuild["target_os"] = target_os
             platformToBuild["target_arch"] = target_arch
@@ -81,14 +82,14 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
                 platformToBuild["context"] = subdir
                 platformToBuild["goss_config"] = os.path.join(subdir, "ci", "goss.yaml")
 
-            platformToBuild["goss_args"] = "tail -f /dev/null" if channel["tests"].get("type", "web") == "cli" else ""
+            platformToBuild["goss_args"] = ""
 
-            platformToBuild["tests_enabled"] = channel["tests"]["enabled"] and platform in TESTABLE_PLATFORMS
-            platformToBuild["tests_command"] = channel["tests"]["command"]
+            platformToBuild["tests_enabled"] = channel["tests_enabled"] and platform in TESTABLE_PLATFORMS
 
-            platformToBuild["build_command"] = toBuild["build_command"]
             platformToBuild["publish_artifacts"] = meta["publish_artifacts"]
-            platformToBuild["update_modules"] = channel["update_modules"]
+            platformToBuild["update_modules_enabled"] = channel["update_modules"]["enabled"]
+            if channel["update_modules"]["enabled"]:
+                platformToBuild["update_modules_branch"] = channel["update_modules"]["cosmossdk_branch"]
 
             appsToBuild["appsPlatforms"].append(platformToBuild)
         appsToBuild["apps"].append(toBuild)

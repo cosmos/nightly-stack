@@ -2,13 +2,13 @@
 app: ibc-go
 repository: cosmos/ibc-go
 path: simapp
-build_command: make build
 publish_artifacts: true
 channels:
   - name: main
     platforms: ["linux/amd64","linux/arm64"]
     branch: main
-    update_modules: true
-    tests:
+    container_tag_name: main
+    update_modules:
       enabled: true
-      command: make init-simapp && simd start
+      cosmossdk_branch: main
+    tests_enabled: true

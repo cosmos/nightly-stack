@@ -2,13 +2,13 @@
 app: cosmos-sdk-comet
 repository: cosmos/cosmos-sdk
 path: simapp
-build_command: make install
-publish_artifacts: true
+publish_artifacts: false
 channels:
   - name: main
     platforms: ["linux/amd64","linux/arm64"]
     branch: main
-    update_modules: false
-    tests:
+    container_tag_name: main
+    update_modules:
       enabled: true
-      command: make init-simapp && simd start
+      cosmossdk_branch: main
+    tests_enabled: true
