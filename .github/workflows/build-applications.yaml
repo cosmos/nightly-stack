@@ -101,7 +101,7 @@ jobs:
         run: |
           set -x
           cd ${{ matrix.app.repository }}/${{ matrix.app.path }}
-          COSMOSSDK_BRANCH=${{ matrix.app.branch }} ../../../nightly-stack/.github/scripts/update-go-modules.sh
+          COSMOSSDK_BRANCH=${{ matrix.app.branch }} ${{ github.workspace }}/nightly-stack/.github/scripts/update-go-modules.sh
 
       - name: show output of modified go.sum and go.mod
         run: |
