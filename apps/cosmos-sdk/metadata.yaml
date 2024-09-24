@@ -11,18 +11,18 @@ channels:
     update_modules: true
     tests:
       enabled: true
-      type: web
+      command: make init-simapp && simd start
   - name: v0.50.x
     branch: refs/heads/release/v0.50.x
     platforms: ["linux/amd64","linux/arm64"]
     update_modules: true
     tests:
       enabled: true
-      type: web
+      command: make init-simapp && simd start
   - name: v0.52.x
     branch: refs/heads/release/v0.52.x
     platforms: ["linux/amd64","linux/arm64"]
     update_modules: false
     tests:
       enabled: true
-      type: web
+      command: make init-simapp && simd start

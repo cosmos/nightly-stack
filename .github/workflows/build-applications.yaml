@@ -19,7 +19,6 @@ on:
         required: false
         default: false
         type: boolean
-  push:
 
 jobs:
   prepare:
@@ -32,17 +31,8 @@ jobs:
         shell: bash
         run: echo "LOWERCASE_REPO_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
-      # - name: Generate Token
-      #   uses: actions/create-github-app-token@v1
-      #   id: app-token
-      #   with:
-      #     app-id: "${{ secrets.BOT_APP_ID }}"
-      #     private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
-
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          token: "${{ steps.app-token.outputs.token }}"
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -70,16 +60,16 @@ jobs:
           echo "${matrices}"
 
   build-platform-app:
-    name: Build/Test ${{ matrix.app.name }} (${{ matrix.app.platform }})
+    name: Build/Test ${{ matrix.app.name }} ${{ matrix.app.channel }} (${{ matrix.app.platform }})
     needs: prepare
     runs-on: ubuntu-latest
-    if: ${{ toJSON(fromJSON(needs.prepare.outputs.matrices).appPlatforms) != '[]' && toJSON(fromJSON(needs.prepare.outputs.matrices).appPlatforms) != '' }}
+    if: ${{ toJSON(fromJSON(needs.prepare.outputs.matrices).appsPlatforms) != '[]' && toJSON(fromJSON(needs.prepare.outputs.matrices).appsPlatforms) != '' }}
     outputs:
       date: ${{ steps.archive.outputs.date }}
     strategy:
       fail-fast: false
       matrix:
-        app: "${{ fromJSON(needs.prepare.outputs.matrices).appPlatforms }}"
+        app: "${{ fromJSON(needs.prepare.outputs.matrices).appsPlatforms }}"
     permissions:
       contents: read
       packages: write
@@ -107,15 +97,11 @@ jobs:
           check-latest: true
 
       - name: Update go modules
-        # Disable dependencies updates for v0.52.x
-        if: matrix.major-version != 'v0.52.x'
+        if: ${{ matrix.app.update_modules }}
         run: |
           set -x
-          ls -l
-          ls -l ../
-          ls -l ../../
           cd ${{ matrix.app.repository }}/${{ matrix.app.path }}
-          COSMOSSDK_BRANCH=${{ matrix.app.branch }} ../../nightly-stack/.github/scripts/update-go-modules.sh
+          COSMOSSDK_BRANCH=${{ matrix.app.branch }} ../../../nightly-stack/.github/scripts/update-go-modules.sh
 
       - name: show output of modified go.sum and go.mod
         run: |
@@ -141,18 +127,22 @@ jobs:
       - name: Run and monitor application
         shell: bash
         # no arm64 runners as of now : https://github.com/orgs/community/discussions/19197
-        if: ${{ matrix.app.target_arch == 'amd64' }}
+        if: ${{ matrix.app.tests_enabled }}
         run: |
           set -oue pipefail
           set -x
+
+          if [[ -z "${{ matrix.app.tests_command }}" ]]; then
+            echo "tests_command is empty. Please check metadata.yaml"
+            exit 1
+          fi
 
           # Set the timeout to 60 seconds
           TIMEOUT=60
           START_TIME=$(date +%s)
 
-          cd cosmos-sdk
-          make init-simapp
-          simd start > ./output.log 2>1 &
+          cd ${{ matrix.app.repository }}/${{ matrix.app.path }}
+          ${{ matrix.app.tests_command }} > ./output.log 2>1 &
           APP_PID=$!
 
 
@@ -180,26 +170,34 @@ jobs:
           done
 
       - name: Create archive
+        if: ${{ matrix.image.publish_artifacts }}
         id: archive
         run: |
           set -oue pipefail
           set -x
 
+          date=$(date +'%Y%m%d')
+          echo "date=$date" >> $GITHUB_ENV
+          echo "date=$date" >> $GITHUB_OUTPUT
+
           # Create archive
-          SIMD_PATH=$(find $(go env GOPATH)/bin | tail -n 1)
-          mv $SIMD_PATH ${{ github.workspace }}/${{ env.RELEASE_NAME }}-${{ matrix.major-version }}-$date-${{ matrix.go-arch }}
+          BINARY_PATH=$(find $(go env GOPATH)/bin | tail -n 1)
+          mv $BINARY_PATH ${{ github.workspace }}/${{ matrix.app.name }}-${{ matrix.app.channel }}-$date-${{ matrix.app.target_arch }}
 
       - name: Upload Artifact
+        if: ${{ matrix.image.publish_artifacts }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.RELEASE_NAME }}-${{ matrix.major-version }}-${{ env.date }}-${{ matrix.go-arch }}
-          path: ${{ github.workspace }}/${{ env.RELEASE_NAME }}-${{ matrix.major-version }}-${{ env.date }}-${{ matrix.go-arch }}
+          name: ${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ env.date }}-${{ matrix.app.target_arch }}
+          path: ${{ github.workspace }}/${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ env.date }}-${{ matrix.app.target_arch }}
           retention-days: 10
 
       - name: Setup Docker Buildx
+        if: ${{ matrix.image.publish_artifacts }}
         uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
+        if: ${{ matrix.image.publish_artifacts }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -213,33 +211,57 @@ jobs:
           version: v0.4.4
 
       - name: Lowercase repository owner
+        if: ${{ matrix.image.publish_artifacts }}
         shell: bash
         run: echo "LOWERCASE_REPO_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> "${GITHUB_ENV}"
 
       - name: Prepare Build Outputs
+        if: ${{ matrix.image.publish_artifacts }}
         id: prepare-build-outputs
         shell: bash
         run: |
-          image_name="ghcr.io/${{ env.LOWERCASE_REPO_OWNER }}/${{ env.RELEASE_NAME }}"
+          image_name="ghcr.io/${{ env.LOWERCASE_REPO_OWNER }}/${{ matrix.app.name }}"
           outputs="type=image,name=${image_name},push-by-digest=true,name-canonical=true,push=true"
 
           echo "image_name=${image_name}" >> $GITHUB_OUTPUT
           echo "outputs=${outputs}" >> $GITHUB_OUTPUT
 
       - uses: actions/download-artifact@v4
+        if: ${{ matrix.image.publish_artifacts }}
         with:
-          name: ${{ env.RELEASE_NAME }}-${{ matrix.major-version }}-${{ env.date }}-${{ matrix.go-arch }}
+          name: ${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ env.date }}-${{ matrix.app.target_arch }}
           path: nightly-stack/containers/cosmos-sdk
+
+      # - name: Build Image
+      #   uses: docker/build-push-action@v6
+      #   id: build-image
+      #   with:
+      #     build-args: |-
+      #       BINARY=${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ env.date }}-${{ matrix.app.target_arch }}
+      #     context: ./nightly-stack/containers/cosmos-sdk
+      #     file: ./nightly-stack/containers/cosmos-sdk/Dockerfile
+      #     platforms: ${{ matrix.app.target_arch }}
+      #     outputs: ${{ steps.prepare-build-outputs.outputs.outputs }}
+      #     cache-from: type=gha
+      #     cache-to: type=gha,mode=max
+      #     labels: |-
+      #       org.opencontainers.image.title=${{ steps.prepare-build-outputs.outputs.image_name }}
+      #       org.opencontainers.image.url=https://ghcr.io/${{ env.LOWERCASE_REPO_OWNER }}/${{ steps.prepare-build-outputs.outputs.image_name }}
+      #       org.opencontainers.image.source=https://github.com/${{ env.LOWERCASE_REPO_OWNER }}/containers
+      #       org.opencontainers.image.version=${{ matrix.app.channel }}
+      #       org.opencontainers.image.revision=${{ github.sha }}
+      #       org.opencontainers.image.vendor=${{ env.LOWERCASE_REPO_OWNER }}
 
       - name: Build Image
         uses: docker/build-push-action@v6
         id: build-image
+        if: ${{ matrix.image.publish_artifacts }}
         with:
           build-args: |-
-            BINARY=${{ env.RELEASE_NAME }}-${{ matrix.major-version }}-${{ env.date }}-${{ matrix.go-arch }}
-          context: ./nightly-stack/containers/cosmos-sdk
-          file: ./nightly-stack/containers/cosmos-sdk/Dockerfile
-          platforms: ${{ matrix.go-arch }}
+            BINARY=${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ env.date }}-${{ matrix.app.target_arch }}
+          context: ./nightly-stack/${{ matrix.app.context }}
+          file: ./nightly-stack/${{ matrix.app.dockerfile }}
+          platforms: ${{ matrix.app.target_arch }}
           outputs: ${{ steps.prepare-build-outputs.outputs.outputs }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -247,13 +269,13 @@ jobs:
             org.opencontainers.image.title=${{ steps.prepare-build-outputs.outputs.image_name }}
             org.opencontainers.image.url=https://ghcr.io/${{ env.LOWERCASE_REPO_OWNER }}/${{ steps.prepare-build-outputs.outputs.image_name }}
             org.opencontainers.image.source=https://github.com/${{ env.LOWERCASE_REPO_OWNER }}/containers
-            org.opencontainers.image.version=${{ matrix.major-version }}
+            org.opencontainers.image.version=${{ matrix.app.channel }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.vendor=${{ env.LOWERCASE_REPO_OWNER }}
 
       - name: Run Goss Tests
         id: dgoss
-        if: ${{ matrix.go-arch == 'amd64' }}
+        if: ${{ matrix.image.tests_enabled }} && ${{ matrix.image.publish_artifacts }}
         env:
           CONTAINER_RUNTIME: docker
           GOSS_FILES_PATH: ${{ github.workspace }}/nightly-stack/containers/cosmos-sdk/ci
@@ -269,17 +291,19 @@ jobs:
           dgoss run ${image_name}
 
       - name: Export Digest
+        if: ${{ matrix.image.publish_artifacts }}
         id: export-digest
         shell: bash
         run: |
-          mkdir -p /tmp/${{ env.RELEASE_NAME }}/digests
+          mkdir -p /tmp/${{ matrix.app.name }}/digests
           digest="${{ steps.build-image.outputs.digest }}"
-          echo "${{ env.RELEASE_NAME }}" > "/tmp/${{ env.RELEASE_NAME }}/digests/${digest#sha256:}"
+          echo "${{ matrix.app.name }}" > "/tmp/${{ matrix.app.name }}/digests/${digest#sha256:}"
 
       - name: Upload Digest
+        if: ${{ matrix.image.publish_artifacts }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.RELEASE_NAME }}-${{ matrix.major-version }}-${{ matrix.go-arch }}
-          path: /tmp/${{ env.RELEASE_NAME }}/*
+          name: ${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ matrix.app.target_arch }}
+          path: /tmp/${{ matrix.app.name }}/*
           if-no-files-found: error
           retention-days: 1

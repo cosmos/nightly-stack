@@ -11,4 +11,4 @@ channels:
     update_modules: true
     tests:
       enabled: true
-      type: web
+      command: make init-simapp && simd start

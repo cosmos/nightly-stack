@@ -84,6 +84,7 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
             platformToBuild["goss_args"] = "tail -f /dev/null" if channel["tests"].get("type", "web") == "cli" else ""
 
             platformToBuild["tests_enabled"] = channel["tests"]["enabled"] and platform in TESTABLE_PLATFORMS
+            platformToBuild["tests_command"] = channel["tests"]["command"]
 
             platformToBuild["build_command"] = toBuild["build_command"]
             platformToBuild["build_artifacts"] = meta["build_artifacts"]
@@ -118,10 +119,10 @@ if __name__ == "__main__":
             elif os.path.isfile(os.path.join("./apps", app, "metadata.json")):
                 meta = load_metadata_file_json(os.path.join("./apps", app, "metadata.json"))
 
-            appsToBuild = get_app_metadata(os.path.join("./apps", app), meta, forRelease, channels=channels)
-            if appsToBuild is not None:
-                appsToBuild["apps"].extend(appsToBuild["apps"])
-                appsToBuild["appsPlatforms"].extend(appsToBuild["appsPlatforms"])
+            appToBuild = get_app_metadata(os.path.join("./apps", app), meta, forRelease, channels=channels)
+            if appToBuild is not None:
+                appsToBuild["apps"].extend(appToBuild["apps"])
+                appsToBuild["appsPlatforms"].extend(appToBuild["appsPlatforms"])
     else:
         for subdir, dirs, files in os.walk("./apps"):
             for file in files:
@@ -133,8 +134,8 @@ if __name__ == "__main__":
                 else:
                     continue
                 if meta is not None:
-                    appsToBuild = get_app_metadata(subdir, meta, forRelease)
-                    if appsToBuild is not None:
-                        appsToBuild["apps"].extend(appsToBuild["apps"])
-                        appsToBuild["appsPlatforms"].extend(appsToBuild["appsPlatforms"])
+                    appToBuild = get_app_metadata(subdir, meta, forRelease)
+                    if appToBuild is not None:
+                        appsToBuild["apps"].extend(appToBuild["apps"])
+                        appsToBuild["appsPlatforms"].extend(appToBuild["appsPlatforms"])
     print(json.dumps(appsToBuild))

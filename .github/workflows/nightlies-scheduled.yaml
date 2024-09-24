@@ -16,22 +16,24 @@ on:
         default: all
   schedule:
     - cron: "0 0 * * *"
+  pull_request:
 
 jobs:
   simple-checks:
     name: Simple Checks
-    uses: .github/workflows/simple-checks.yaml
+    uses: ./.github/workflows/simple-checks.yaml
 
   build-images:
     name: Build Images
     needs: simple-checks
-    uses: .github/workflows/build-applications.yaml
+    uses: ./.github/workflows/build-applications.yaml
     secrets: inherit
     permissions:
       contents: read
       packages: write
     with:
-      appsToBuild: ${{ inputs.appsToBuild }}
+      # appsToBuild: ${{ inputs.appsToBuild }}
+      appsToBuild: all
       publishArtifacts: true
       sendNotifications: true
 

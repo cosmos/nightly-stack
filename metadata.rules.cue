@@ -1,16 +1,21 @@
+
 #Spec: {
-    app: #AppName
-    semver?: bool
+    app:        #AppName
+    repository: string
+    path:       string
+    build_command: string
+    build_artifacts: bool
     channels: [...#Channels]
 }
 
 #Channels: {
-    name: #ChannelName
+    name:     #ChannelName
     platforms: [...#Platforms]
-    stable: bool
+    branch:    string
+    update_modules?: bool
     tests: {
         enabled: bool
-        type?:   =~"^(cli|web)$"
+        command: string
     }
 }
 

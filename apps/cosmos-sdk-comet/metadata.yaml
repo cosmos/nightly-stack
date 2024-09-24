@@ -1,5 +1,5 @@
 ---
-app: cosmos-sdk
+app: cosmos-sdk-comet
 repository: cosmos/cosmos-sdk
 path: simapp
 build_command: make install
@@ -11,4 +11,4 @@ channels:
     update_modules: false
     tests:
       enabled: true
-      type: web
+      command: make init-simapp && simd start
