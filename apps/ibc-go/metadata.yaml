@@ -3,7 +3,7 @@ app: ibc-go
 repository: cosmos/ibc-go
 path: simapp
 build_command: make build
-build_artifacts: true
+publish_artifacts: true
 channels:
   - name: main
     platforms: ["linux/amd64","linux/arm64"]

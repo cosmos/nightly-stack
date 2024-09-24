@@ -60,7 +60,7 @@ jobs:
           echo "${matrices}"
 
   build-platform-app:
-    name: Build/Test ${{ matrix.app.name }} ${{ matrix.app.channel }} (${{ matrix.app.platform }})
+    name: "Build ${{ matrix.app.name }} ${{ matrix.app.channel }} (${{ matrix.app.platform }})"
     needs: prepare
     runs-on: ubuntu-latest
     if: ${{ toJSON(fromJSON(needs.prepare.outputs.matrices).appsPlatforms) != '[]' && toJSON(fromJSON(needs.prepare.outputs.matrices).appsPlatforms) != '' }}
@@ -275,7 +275,7 @@ jobs:
 
       - name: Run Goss Tests
         id: dgoss
-        if: ${{ matrix.image.tests_enabled }} && ${{ matrix.image.publish_artifacts }}
+        if: ${{ matrix.image.tests_enabled && matrix.image.publish_artifacts }}
         env:
           CONTAINER_RUNTIME: docker
           GOSS_FILES_PATH: ${{ github.workspace }}/nightly-stack/containers/cosmos-sdk/ci

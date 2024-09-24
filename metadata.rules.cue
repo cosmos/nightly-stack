@@ -4,7 +4,7 @@
     repository: string
     path:       string
     build_command: string
-    build_artifacts: bool
+    publish_artifacts: bool
     channels: [...#Channels]
 }
 

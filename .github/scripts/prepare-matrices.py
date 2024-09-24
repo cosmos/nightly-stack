@@ -45,7 +45,7 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
         toBuild["branch"] = channel["branch"]
         toBuild["update_modules"] = channel["update_modules"]
         toBuild["build_command"] = meta["build_command"]
-        toBuild["build_artifacts"] = meta["build_artifacts"]
+        toBuild["publish_artifacts"] = meta["publish_artifacts"]
 
         # Container Tags
         toBuild["tags"] = [channel]
@@ -87,7 +87,7 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
             platformToBuild["tests_command"] = channel["tests"]["command"]
 
             platformToBuild["build_command"] = toBuild["build_command"]
-            platformToBuild["build_artifacts"] = meta["build_artifacts"]
+            platformToBuild["publish_artifacts"] = meta["publish_artifacts"]
             platformToBuild["update_modules"] = channel["update_modules"]
 
             appsToBuild["appsPlatforms"].append(platformToBuild)

@@ -3,7 +3,7 @@ app: cosmos-sdk
 repository: cosmos/cosmos-sdk
 path: simapp
 build_command: make install
-build_artifacts: true
+publish_artifacts: true
 channels:
   - name: main
     platforms: ["linux/amd64","linux/arm64"]

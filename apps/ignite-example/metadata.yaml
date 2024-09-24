@@ -1,14 +1,14 @@
 ---
-app: cosmos-sdk-comet
-repository: cosmos/cosmos-sdk
-path: simapp
-build_command: make install
+app: ignite-example
+repository: ignite/example
+path: ./
+build_command: go install
 publish_artifacts: true
 channels:
-  - name: main
+  - name: master
     platforms: ["linux/amd64","linux/arm64"]
-    branch: main
-    update_modules: false
+    branch: master
+    update_modules: true
     tests:
       enabled: true
       command: make init-simapp && simd start
