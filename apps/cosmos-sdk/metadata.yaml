@@ -1,7 +1,8 @@
 ---
 app: cosmos-sdk
-repository: github.com/cosmos/cosmos-sdk
+repository: cosmos/cosmos-sdk
 path: simapp
+build_command: make install
 build_artifacts: true
 channels:
   - name: main
