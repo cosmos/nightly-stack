@@ -5,6 +5,7 @@
     path:       string
     fetch_full_history?: bool
     publish_artifacts: bool
+    binary_name?: string
     channels: [...#Channels]
 }
 

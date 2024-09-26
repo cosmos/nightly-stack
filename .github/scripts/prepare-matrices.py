@@ -65,7 +65,7 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
             platformToBuild["repository"] = toBuild["repository"]
             platformToBuild["path"] = toBuild["path"]
             platformToBuild["branch"] = toBuild["branch"]
-            if meta["fetch_full_history"]:
+            if meta.get("fetch_full_history"):
                 platformToBuild["fetch_full_history"] = meta["fetch_full_history"]
             platformToBuild["platform"] = platform
             platformToBuild["target_os"] = target_os
@@ -87,6 +87,9 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
             platformToBuild["tests_enabled"] = channel["tests_enabled"] and platform in TESTABLE_PLATFORMS
 
             platformToBuild["publish_artifacts"] = meta["publish_artifacts"]
+            if meta.get("binary_name"):
+                platformToBuild["binary_name"] = meta["binary_name"]
+
             platformToBuild["update_modules_enabled"] = channel["update_modules"]["enabled"]
             if channel["update_modules"]["enabled"]:
                 platformToBuild["update_modules_branch"] = channel["update_modules"]["cosmossdk_branch"]

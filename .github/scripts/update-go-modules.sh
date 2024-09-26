@@ -106,7 +106,7 @@ for module in $modules; do
                             exit 1
                         fi
                         ;;
-                    *errors*)
+                    *errors*|*api*|*core*)
                         echo "ignore $module"
                         ;;
                     *)

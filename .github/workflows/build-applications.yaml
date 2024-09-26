@@ -121,6 +121,7 @@ jobs:
           MATRIX_APP_REPOSITORY: ${{ matrix.app.repository }}
           MATRIX_APP_PATH: ${{ matrix.app.path }}
           GOARCH: ${{ matrix.app.target_arch }}
+          BINARY_NAME: ${{ matrix.app.binary_name }}
         run: ./nightly-stack/apps/${{ matrix.app.name }}/ci/build.sh
 
       - name: Run and monitor application
@@ -131,16 +132,24 @@ jobs:
           MATRIX_APP_REPOSITORY: ${{ matrix.app.repository }}
           MATRIX_APP_PATH: ${{ matrix.app.path }}
           GOARCH: ${{ matrix.app.target_arch }}
+          BINARY_NAME: ${{ matrix.app.binary_name }}
         run: ./nightly-stack/apps/${{ matrix.app.name }}/ci/test.sh
 
       - name: Create archive
         if: ${{ matrix.app.publish_artifacts }}
+        env:
+          BINARY_NAME: ${{ matrix.app.binary_name }}
         run: |
           set -oue pipefail
           set -x
 
           # Create archive
-          BINARY_PATH=$(find $(go env GOPATH)/bin | tail -n 1)
+          if [[ -z $BINARY_NAME ]]; then
+            BINARY_PATH=$(find $(go env GOPATH)/bin | tail -n 1)
+          else
+            BINARY_PATH=$(find $(go env GOPATH)/bin | grep $BINARY_NAME | tail -n 1)
+          fi
+          chmod +x $BINARY_PATH
           mv $BINARY_PATH ${{ github.workspace }}/${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ matrix.app.target_os }}-${{ matrix.app.target_arch }}
 
       - name: Upload Artifact
