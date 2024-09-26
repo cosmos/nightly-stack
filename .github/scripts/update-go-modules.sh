@@ -33,7 +33,7 @@ get_pseudo_version() {
     fi
 }
 
-get_and_update_module() {
+replace_module() {
     local commit=$1
     pseudo_version=$(get_pseudo_version "$module" "$commit")
 
@@ -45,6 +45,16 @@ get_and_update_module() {
     echo "Updating $module to pseudo-version $pseudo_version"
 
     go mod edit -replace=$module=$module@$pseudo_version
+
+    return 0
+}
+
+get_module() {
+    local commit=$1
+
+    echo "Get $module to commit $commit"
+
+    go get $module@$commit
 
     return 0
 }
@@ -98,28 +108,60 @@ for module in $modules; do
         # Checking cosmos-sdk modules
         case "$module" in
             *cosmossdk.io*)
-                case "$module" in
-                    # Force checking specific modules to HEAD of main instead of release
-                    *core/testing*|*depinject*|*log*|*math*|*schema*)
-                        if ! get_and_update_module "$cosmossdk_latest_commit_main"; then
+
+                if [[ "$COSMOSSDK_BRANCH" =~ "v0.50.x" ]]; then
+                    case "$module" in
+                        # Force checking specific modules to HEAD of main instead of release
+                        *core/testing*|*depinject*|*log*|*math*|*schema*)
+                            if ! replace_module "$cosmossdk_latest_commit_main"; then
+                                echo "Failed to update module $module after trying main."
+                                exit 1
+                            fi
+                            ;;
+                        *errors*|*api*|*core*)
+                            echo "ignore $module"
+                            ;;
+                        *)
+                                if ! replace_module "$cosmossdk_latest_commit_branch"; then
+                                    echo "Failed to update module $module after trying $COSMOSSDK_BRANCH."
+                                fi
+                            ;;
+                    esac
+                elif [[ "$COSMOSSDK_BRANCH" =~ "v0.52.x" ]]; then
+                    case "$module" in
+                        # Force checking specific modules to HEAD of refs/heads/release/v0.52.x instead of main
+                        *client/v2*|*x/*)
+                            # Exception for x/tx
+                            if [[ "$module" =~ "x/tx" ]]; then
+                                if ! replace_module "$cosmossdk_latest_commit_main"; then
+                                    echo "Failed to update module $module after trying main."
+                                    exit 1
+                                fi
+                            elif ! replace_module "$cometbft_latest_commit_branch"; then
                             echo "Failed to update module $module after trying main."
                             exit 1
-                        fi
-                        ;;
-                    *errors*|*api*|*core*)
-                        echo "ignore $module"
-                        ;;
-                    *)
-                            if ! get_and_update_module "$cosmossdk_latest_commit_branch"; then
-                                echo "Failed to update module $module after trying $COSMOSSDK_BRANCH."
+                                if ! replace_module "$cosmossdk_latest_commit_branch"; then
+                                    echo "Failed to update module $module after trying $COSMOSSDK_BRANCH."
+                                fi
                             fi
-                        ;;
-                esac
+                            ;;
+                        *errors*)
+                            echo "ignore $module"
+                            ;;
+                        *)
+                                if ! replace_module "$cosmossdk_latest_commit_main"; then
+                                    echo "Faiif ! replace_module "$cometbft_latest_commit_branch"; then
+                            echo "Failed to update module $module after trying main."
+                            exit 1led to update module $module after trying main."
+                                fi
+                            ;;
+                    esac
+                fi
                 ;;
             *github.com/cosmos/cosmos-sdk*)
 
                 # modules that need to follow HEAD on release branch
-                if ! get_and_update_module "$cosmossdk_latest_commit_branch"; then
+                if ! replace_module "$cosmossdk_latest_commit_branch"; then
                     echo "Failed to update module $module after trying $COSMOSSDK_BRANCH."
                     exit 1
                 fi
@@ -129,7 +171,7 @@ for module in $modules; do
                 if [[ "$COSMOSSDK_BRANCH" == "main" ]]; then
                     # Exclude cometbft/cometbft-db from logic
                     if [[ ! "$module" =~ "cometbft-db" ]]; then
-                        if ! get_and_update_module "$cometbft_latest_commit_branch"; then
+                        if ! get_module "$cometbft_latest_commit_branch"; then
                             echo "Failed to update module $module after trying main."
                             exit 1
                         fi

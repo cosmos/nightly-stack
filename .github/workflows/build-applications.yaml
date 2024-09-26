@@ -173,7 +173,7 @@ jobs:
           password: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Setup Goss
-        if: ${{ matrix.app.tests_enabled }}
+        if: ${{ matrix.app.tests_enabled && matrix.app.publish_artifacts }}
         uses: e1himself/goss-installation-action@v1
         with:
           version: v0.4.4
@@ -223,7 +223,7 @@ jobs:
 
       - name: Run Goss Tests
         id: dgoss
-        if: ${{ matrix.app.tests_enabled }}
+        if: ${{ matrix.app.tests_enabled && matrix.app.publish_artifacts }}
         env:
           CONTAINER_RUNTIME: docker
           GOSS_FILE: ./nightly-stack/${{ matrix.app.goss_config }}
