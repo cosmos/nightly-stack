@@ -10,7 +10,6 @@ if [[ ! -f "${NODE_HOME}/config.json" ]]; then
     echo "Launch init procedure..."
     /app/node config set client chain-id testchain --home ${NODE_HOME}
     /app/node config set client keyring-backend test --home ${NODE_HOME}
-    /app/node config set client keyring-default-keyname alice --home ${NODE_HOME}
     /app/node config set app api.enable true --home ${NODE_HOME}
     /app/node keys add alice --home ${NODE_HOME}
     /app/node keys add bob --home ${NODE_HOME}

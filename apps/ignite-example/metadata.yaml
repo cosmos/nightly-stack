@@ -13,11 +13,11 @@ channels:
     update_modules:
       enabled: false
     tests_enabled: true
-  # - name: master-mods
-  #   platforms: ["linux/amd64","linux/arm64"]
-  #   branch: master
-  #   container_tag_name: master
-  #   update_modules:
-  #     enabled: true
-  #     cosmossdk_branch: refs/heads/release/v0.50.x
-  #   tests_enabled: true
+  - name: master-mods
+    platforms: ["linux/amd64"]
+    branch: master
+    container_tag_name: master
+    update_modules:
+      enabled: true
+      cosmossdk_branch: refs/heads/release/v0.50.x
+    tests_enabled: true
