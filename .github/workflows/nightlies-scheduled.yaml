@@ -1,5 +1,8 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Workflow that creates nightly builds of application declared on the repository.
+# The workflow is described in the README.md at the root of the repository
+
 name: Scheduled Nightlies
 
 concurrency:
