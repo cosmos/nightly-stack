@@ -1,0 +1,8 @@
+# .ansible-lint
+skip_list:
+  - yaml[indentation]
+  - yaml[line-length]
+warn_list:
+  - command-instead-of-module
+  - command-instead-of-shell
+  - unnamed-task

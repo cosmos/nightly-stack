@@ -1,0 +1,12 @@
+---
+- name: Testnet | cancri-1 | validator-1 | Deploy quadlet files
+  ansible.builtin.template:
+    src: "cancri-1-validator-1/{{ item }}.j2"
+    dest: "{{ quadlet_dir }}/cancri-1-validator-1.{{ item }}"
+    owner: nonroot
+    group: users
+    mode: "0644"
+  loop:
+    - container
+    - volume
+  notify: systemd_enableservices_nonroot

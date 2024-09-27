@@ -1,0 +1,6 @@
+---
+all:
+  hosts:
+    testnet-1:
+      ansible_host: 91.107.211.214
+      ansible_user: root

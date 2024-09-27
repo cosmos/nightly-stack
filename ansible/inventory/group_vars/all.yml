@@ -1,0 +1,3 @@
+---
+quadlet_dir: /home/nonroot/.config/containers/systemd/
+quadlet_volumes_dir: /mnt/container-volumes
