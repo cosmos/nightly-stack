@@ -118,7 +118,7 @@ for module in $modules; do
                                 exit 1
                             fi
                             ;;
-                        *errors*|*api*|*core*)
+                        *api*|*core*|*collections*|*errors*)
                             echo "ignore $module"
                             ;;
                         *)
@@ -150,9 +150,7 @@ for module in $modules; do
                             ;;
                         *)
                                 if ! replace_module "$cosmossdk_latest_commit_main"; then
-                                    echo "Faiif ! replace_module "$cometbft_latest_commit_branch"; then
-                            echo "Failed to update module $module after trying main."
-                            exit 1led to update module $module after trying main."
+                                    echo "Failed to update module $module after trying main."
                                 fi
                             ;;
                     esac
