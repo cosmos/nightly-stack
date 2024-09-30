@@ -8,8 +8,8 @@ TIMEOUT=60
 START_TIME=$(date +%s)
 
 cd ${MATRIX_APP_REPOSITORY}
-make init-simapp
-./simd start > ./output.log 2>1 &
+make init-simapp-v2
+simdv2 start > ./output.log 2>1 &
 APP_PID=$!
 
 
