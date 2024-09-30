@@ -1,0 +1,45 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Workflow that creates nightly builds of application declared on the repository.
+# The workflow is described in the README.md at the root of the repository
+
+name: Scheduled Nightlies
+
+concurrency:
+  group: nightlies
+  cancel-in-progress: false
+
+on:
+  workflow_dispatch:
+    inputs:
+      appsToBuild:
+        description: App(s) to build
+        required: false
+        type: string
+        default: all
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  simple-checks:
+    name: Simple Checks
+    uses: ./.github/workflows/simple-checks.yaml
+
+  build-images:
+    name: Build Images
+    needs: simple-checks
+    uses: ./.github/workflows/build-applications.yaml
+    secrets: inherit
+    permissions:
+      contents: read
+      packages: write
+    with:
+      appsToBuild: ${{ inputs.appsToBuild }}
+      publishArtifacts: true
+      sendNotifications: true
+
+  # render-readme:
+  #   name: Render Readme
+  #   needs: build-images
+  #   uses: ./.github/workflows/render-readme.yaml
+  #   secrets: inherit
