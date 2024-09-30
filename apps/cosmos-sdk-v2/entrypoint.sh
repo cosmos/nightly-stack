@@ -12,7 +12,6 @@ if [[ ! -f "${COSMOS_NODE_HOME}/config.json" ]]; then
     echo "Launch init procedure..."
     /app/node config set client chain-id ${COSMOS_CHAIN_ID} --home ${COSMOS_NODE_HOME}
     /app/node config set client keyring-backend test --home ${COSMOS_NODE_HOME}
-    /app/node config set app api.enable true --home ${COSMOS_NODE_HOME}
     /app/node keys add alice --home ${COSMOS_NODE_HOME}
     /app/node keys add bob --home ${COSMOS_NODE_HOME}
     /app/node init ${COSMOS_MONIKER} --chain-id ${COSMOS_CHAIN_ID} --home ${COSMOS_NODE_HOME}

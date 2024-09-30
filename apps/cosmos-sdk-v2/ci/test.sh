@@ -26,9 +26,8 @@ while true; do
     exit 1
   fi
 
-  check_height=$(curl --silent "http://localhost:26657/block?height=4" | jq --raw-output 'if .result.block.header.height then "Height exists: " + .result.block.header.height else "Height does not exist" end')
   # Check that 4th block is produced to validate the application
-  if [[ -z "$check_height" && "$check_height" == "Height exists: 4" ]]; then
+  if ${BINARY_PATH} query comet block --type=height 4; then
     echo "Block #4 has been committed. Application is working correctly."
     kill $APP_PID
     exit 0

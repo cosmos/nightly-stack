@@ -1,0 +1,23 @@
+[Unit]
+Description=Node cosmos-sdk v0.50.x
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+TimeoutStartSec=900
+Restart=always
+RestartSec=3
+
+[Container]
+AutoUpdate=registry
+ContainerName=050-1-node
+Image=ghcr.io/cosmos/cosmos-sdk:0.50-mods
+Environment=COSMOS_CHAIN_ID="050-1"
+Environment=COSMOS_MONIKER="050-1-node"
+PublishPort=26656:26656
+PublishPort=26657:26657
+Volume=050-1-node:/config
+Label=app=050-1-node
+
+[Install]
+WantedBy=default.target
