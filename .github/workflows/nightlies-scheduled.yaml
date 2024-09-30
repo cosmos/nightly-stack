@@ -19,7 +19,6 @@ on:
         default: all
   schedule:
     - cron: "0 0 * * *"
-  pull_request:
 
 jobs:
   simple-checks:
@@ -35,8 +34,7 @@ jobs:
       contents: read
       packages: write
     with:
-      # appsToBuild: ${{ inputs.appsToBuild }}
-      appsToBuild: all
+      appsToBuild: ${{ inputs.appsToBuild }}
       publishArtifacts: true
       sendNotifications: true
 
