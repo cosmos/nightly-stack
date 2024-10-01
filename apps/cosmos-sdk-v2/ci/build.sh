@@ -9,4 +9,4 @@ go mod tidy
 
 # Build application
 cd ..
-make install
+COSMOS_BUILD_OPTIONS=v2 make install

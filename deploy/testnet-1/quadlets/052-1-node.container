@@ -1,0 +1,23 @@
+[Unit]
+Description=Node cosmos-sdk v0.52.x
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+TimeoutStartSec=900
+Restart=always
+RestartSec=3
+
+[Container]
+AutoUpdate=registry
+ContainerName=052-1-node
+Image=ghcr.io/cosmos/cosmos-sdk:0.52-mods
+Environment=COSMOS_CHAIN_ID="052-1"
+Environment=COSMOS_MONIKER="052-1-node"
+PublishPort=26666:26656
+PublishPort=26667:26657
+Volume=052-1-node:/config
+Label=app=052-1-node
+
+[Install]
+WantedBy=default.target
