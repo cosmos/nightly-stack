@@ -135,6 +135,23 @@ jobs:
           BINARY_NAME: ${{ matrix.app.binary_name }}
         run: ./nightly-stack/apps/${{ matrix.app.name }}/ci/test.sh
 
+      - name: Export Build Result
+        if: ${{ !matrix.app.publish_artifacts }}
+        id: export-build
+        shell: bash
+        run: |
+          mkdir -p /tmp/${{ matrix.app.name }}/build
+          echo "${{ matrix.app.name }}" > "/tmp/${{ matrix.app.name }}/build/${{ matrix.app.target_os }}-${{ matrix.app.target_arch }}"
+
+      - name: Upload Build Result
+        if: ${{ !matrix.app.publish_artifacts }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: wfl-build-${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ matrix.app.target_os }}-${{ matrix.app.target_arch }}
+          path: /tmp/${{ matrix.app.name }}/*
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Create archive
         if: ${{ matrix.app.publish_artifacts }}
         env:
@@ -251,7 +268,7 @@ jobs:
         if: ${{ matrix.app.publish_artifacts }}
         uses: actions/upload-artifact@v4
         with:
-          name: digest-${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ matrix.app.target_os }}-${{ matrix.app.target_arch }}
+          name: wfl-digest-${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ matrix.app.target_os }}-${{ matrix.app.target_arch }}
           path: /tmp/${{ matrix.app.name }}/*
           if-no-files-found: error
           retention-days: 1
@@ -282,15 +299,44 @@ jobs:
           set -x
           echo "LOWERCASE_REPO_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
-      - name: Download Digests
+      - name: Download Build output
+        if: ${{ !matrix.app.publish_artifacts }}
         uses: actions/download-artifact@v4
         with:
-          pattern: "digest-${{ matrix.app.name }}-${{ matrix.app.channel }}-{linux,darwin}-{amd64,arm64}"
+          pattern: "wfl-build-${{ matrix.app.name }}-${{ matrix.app.channel }}-{linux,darwin}-{amd64,arm64}"
           merge-multiple: true
           path: /tmp/${{ matrix.app.name }}
 
-      - name: Ensure all platforms were built
+      - name: Build - Ensure all platforms were built
+        id: ensure-platforms-build
+        if: ${{ !matrix.app.publish_artifacts }}
+        shell: bash
+        run: |
+          EXPECTED_COUNT=$(cat << EOF | jq ". | length"
+          ${{ toJSON(matrix.app.platforms) }}
+          EOF
+          )
+          ACTUAL_COUNT=$(ls -1 /tmp/${{ matrix.app.name }}/build | wc -l)
+          if [[ $EXPECTED_COUNT != $ACTUAL_COUNT ]]; then
+              echo "Expected $EXPECTED_COUNT platforms, but only found $ACTUAL_COUNT"
+              echo "Expected: ${{ toJSON(matrix.app.platforms) }}"
+              echo "Actual: $(cat /tmp/${{ matrix.app.name }}/build/*)"
+              exit 1
+          fi
+
+          echo "app_status=true" >> $GITHUB_ENV
+
+      - name: Download Digests
+        if: ${{ matrix.app.publish_artifacts }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "wfl-digest-${{ matrix.app.name }}-${{ matrix.app.channel }}-{linux,darwin}-{amd64,arm64}"
+          merge-multiple: true
+          path: /tmp/${{ matrix.app.name }}
+
+      - name: Digests - Ensure all platforms were built
         id: ensure-platforms
+        if: ${{ matrix.app.publish_artifacts }}
         shell: bash
         run: |
           EXPECTED_COUNT=$(cat << EOF | jq ". | length"
@@ -304,11 +350,12 @@ jobs:
               echo "Actual: $(cat /tmp/${{ matrix.app.name }}/digests/*)"
               exit 1
           fi
-
       - name: Setup Docker Buildx
+        if: ${{ matrix.app.publish_artifacts }}
         uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
+        if: ${{ matrix.app.publish_artifacts }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -316,6 +363,7 @@ jobs:
           password: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Log Files
+        if: ${{ matrix.app.publish_artifacts }}
         working-directory: /tmp/${{ matrix.app.name }}/digests
         shell: bash
         run: |
@@ -324,6 +372,7 @@ jobs:
 
       - name: Merge Manifests
         id: merge
+        if: ${{ matrix.app.publish_artifacts }}
         working-directory: /tmp/${{ matrix.app.name }}/digests
         shell: bash
         run: |
@@ -333,14 +382,16 @@ jobs:
               $(printf 'ghcr.io/${{ env.LOWERCASE_REPO_OWNER }}/${{ matrix.app.name }}@sha256:%s ' *)
 
       - name: Inspect image
+        if: ${{ matrix.app.publish_artifacts }}
         id: inspect
         shell: bash
         run: |
           docker buildx imagetools inspect ghcr.io/${{ env.LOWERCASE_REPO_OWNER }}/${{ matrix.app.name }}:${{ matrix.app.container_tag_name }}
+          echo "app_status=true" >> $GITHUB_ENV
 
       - name: Build successful
         id: build-success
-        if: ${{ always() && steps.merge.outcome == 'success' && steps.inspect.outcome == 'success' }}
+        if: ${{ always() && env.app_status == 'true' }}
         shell: bash
         run: |
           echo "slack_message=🎉 Nightly build ${{ matrix.app.name }} (${{ matrix.app.channel }})" >> $GITHUB_OUTPUT
@@ -349,21 +400,55 @@ jobs:
 
       - name: Build failed
         id: build-failed
-        if: ${{ always() && (steps.merge.outcome == 'failure' || steps.inspect.outcome == 'failure') }}
+        if: ${{ always() && env.app_status != 'true' }}
         shell: bash
         run: |
           echo "slack_message=💥 Nightly build ${{ matrix.app.name }} (${{ matrix.app.channel }})" >> $GITHUB_OUTPUT
-          echo "slack_color=danger" >> $GITHUB_OUTcurl https://get.ignite.com/cli! | bashPUT
+          echo "slack_color=danger" >> $GITHUB_OUTPUT
           echo "slack_icon_emoji=:skull:" >> $GITHUB_OUTPUT
 
-      - name: Get previous workflow status
-        uses: cosmos/cosmos-sdk/.github/actions/last-workflow-status@main
-        id: last_status
+      - name: Get previous workflow run
+        uses: actions/github-script@v6
+        id: get-previous-run
+        if: always() && (github.event_name == 'schedule' || github.ref == 'refs/heads/main')
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const workflow_id = context.workflow;
+            const branch = context.ref.replace('refs/heads/', '');
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflow_id,
+              branch: branch,
+              status: 'completed',
+              per_page: 1
+            });
+            return runs.data.workflow_runs[0].id;
+
+      - name: Check specific matrix job
+        id: check-matrix
+        if: steps.get-previous-run.outputs.result
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const run_id = ${{ steps.get-previous-run.outputs.result }};
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: run_id
+            });
+
+            // Replace 'your-matrix-key' and 'your-matrix-value' with your actual matrix parameters
+            const specificJob = jobs.data.jobs.find(job =>
+              job.name.includes('your-matrix-key') && job.name.includes('your-matrix-value')
+            );
+
+            const wasSuccessful = specificJob && specificJob.conclusion === 'success';
+            console.log(`The specific matrix job was ${wasSuccessful ? 'successful' : 'not successful'}`);
+            core.setOutput('was-successful', wasSuccessful);
 
       - name: Notify Slack
-        if: ${{ always() && inputs.sendNotifications == 'true' }}
+        if: inputs.sendNotifications == 'true' && ((steps.check-matrix.outputs.was-successful && env.app_status != 'true') || (!steps.check-matrix.outputs.was-successful && env.app_status == 'true'))
         uses: rtCamp/action-slack-notify@v2.3.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
