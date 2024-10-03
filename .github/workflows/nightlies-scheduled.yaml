@@ -17,6 +17,16 @@ on:
         required: false
         type: string
         default: all
+      publishArtifacts:
+        description: Publish Artifacts
+        required: false
+        type: boolean
+        default: false
+      sendNotifications:
+        description: Send notifications
+        required: false
+        type: boolean
+        default: false
   schedule:
     - cron: "0 0 * * *"
 

@@ -328,8 +328,6 @@ jobs:
               exit 1
           fi
 
-          echo "app_status=true" >> $GITHUB_ENV
-
       - name: Download Digests
         if: ${{ matrix.app.publish_artifacts }}
         uses: actions/download-artifact@v4
@@ -391,7 +389,6 @@ jobs:
         shell: bash
         run: |
           docker buildx imagetools inspect ghcr.io/${{ env.LOWERCASE_REPO_OWNER }}/${{ matrix.app.name }}:${{ matrix.app.container_tag_name }}
-          echo "app_status=true" >> $GITHUB_ENV
 
       - name: Build successful
         id: build-success
@@ -417,12 +414,11 @@ jobs:
         if: always() && (github.event_name == 'schedule' || github.ref == 'refs/heads/main')
         with:
           script: |
-            const workflow_id = context.workflow;
             const branch = context.ref.replace('refs/heads/', '');
             const runs = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: workflow_id,
+              workflow_id: 'nightlies-scheduled.yaml',
               branch: branch,
               status: 'completed',
               per_page: 1
@@ -442,9 +438,8 @@ jobs:
               run_id: run_id
             });
 
-            // Replace 'your-matrix-key' and 'your-matrix-value' with your actual matrix parameters
             const specificJob = jobs.data.jobs.find(job =>
-              job.name.includes('your-matrix-key') && job.name.includes('your-matrix-value')
+              job.name === 'Build Images / Merge ${{ matrix.app.name }} ${{ matrix.app.channel }}'
             );
 
             const wasSuccessful = specificJob && specificJob.conclusion === 'success';
@@ -452,7 +447,7 @@ jobs:
             core.setOutput('was-successful', wasSuccessful);
 
       - name: Notify Slack
-        if: inputs.sendNotifications == 'true' && ((steps.check-matrix.outputs.was-successful && env.app_status != 'true') || (!steps.check-matrix.outputs.was-successful && env.app_status == 'true'))
+        # if: inputs.sendNotifications == 'true' && ((steps.check-matrix.outputs.was-successful && env.app_status != 'true') || (!steps.check-matrix.outputs.was-successful && env.app_status == 'true'))
         uses: rtCamp/action-slack-notify@v2.3.0
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
