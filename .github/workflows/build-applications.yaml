@@ -119,6 +119,16 @@ jobs:
           echo "############"
           cat ${{ matrix.app.repository }}/${{ matrix.app.path }}/go.sum
 
+      - name: register cosmossdk and cometbft versions
+        id: modules_versions
+        run: |
+          set -x
+          cd ${{ matrix.app.repository }}/${{ matrix.app.path }}
+          COSMOSSDK_VERSION=$(go list -m -f '{{.Version}}' github.com/cosmos/cosmos-sdk)
+          COMETBFT_VERSION=$(go list -m -f '{{.Version}}' github.com/cometbft/cometbft)
+          echo "cosmossdk=${COSMOSSDK_VERSION}" >> $GITHUB_OUTPUT
+          echo "cometbft=${COMETBFT_VERSION}" >> $GITHUB_OUTPUT
+
       - name: Create application binary
         id: build
         env:
@@ -241,6 +251,9 @@ jobs:
             org.opencontainers.image.version=${{ matrix.app.channel }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.vendor=${{ env.LOWERCASE_REPO_OWNER }}
+            org.opencontainers.image.authors=${{ env.LOWERCASE_REPO_OWNER }}
+            org.cosmos.cosmossdk.version=${{ steps.modules_versions.outputs.cosmossdk }}
+            org.cosmos.cometbft.version=${{ steps.modules_versions.outputs.cometbft }}
 
       - name: Run Goss Tests
         id: dgoss
