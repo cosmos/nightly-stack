@@ -1,7 +1,7 @@
 
-# `0-50-1` Chain Details
+# `050-1` Chain Details
 
-* **Chain-ID**: `0-50-1`
+* **Chain-ID**: `050-1`
 * **denom**: `ucoin`
 * **Current Cosmos SDK upstream**: [`v0.50.x`](https://github.com/cosmos/cosmos-sdk/tree/release/v0.50.x)
 * **Genesis File:**  provider-genesis.json, verify with `shasum -a 256 genesis.json`
@@ -12,15 +12,9 @@
 
 ### RPC
 
-`https://050-1-testnet.interchainsdk.io`
+`https://050-1-testnet.interchainsdk.io:20056`
 
 
 ### Seed
 
-`9f1e4c9d594ed5e5b5bcd2c718c40ddc13d4eb4e@050-1-testnet.interchainsdk.io:26656`
-
-
-## How to Join
-
-### Bash Script
-
+`9f1e4c9d594ed5e5b5bcd2c718c40ddc13d4eb4e@050-1-testnet.interchainsdk.io:20056`
