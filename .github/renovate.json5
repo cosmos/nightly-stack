@@ -1,0 +1,16 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:best-practices",
+        ":disableRateLimiting",
+        "local>cosmos/infra//.github/renovate/containers.json5",
+        "local>cosmos/infra//.github/renovate/githubActions.json5",
+        "local>cosmos/infra//.github/renovate/labels.json5",
+        "local>cosmos/infra//.github/renovate/semanticCommits.json5",
+    ],
+    "baseBranches": ["main"],
+    "platformCommit": "enabled",
+    "dependencyDashboardTitle": "Renovate Dashboard 🤖",
+    "suppressNotifications": ["prIgnoreNotification"],
+    "ignorePaths": ["**/.archive/**"]
+}
