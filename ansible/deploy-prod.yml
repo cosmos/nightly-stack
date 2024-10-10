@@ -1,0 +1,8 @@
+---
+- name: Deploy all testnets on production
+  hosts: testnet-1
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+  roles:
+    - role: testnets

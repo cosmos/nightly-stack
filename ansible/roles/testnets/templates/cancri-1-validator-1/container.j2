@@ -1,0 +1,22 @@
+[Unit]
+Description=cancri-1 testnet - cosmos-sdk - validator #1
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+TimeoutStartSec=900
+Restart=always
+RestartSec=3
+
+[Container]
+AutoUpdate=registry
+ContainerName=cancri-1-validator-1
+Image=ghcr.io/auricom/cosmos-sdk:0.50-mods
+PublishPort=26656:26656
+PublishPort=26657:26657
+Volume=cancri-1-validator-1:/config
+Label=app=cancri-1-validator-1
+Label=io.containers.autoupdate=registry
+
+[Install]
+WantedBy=default.target
