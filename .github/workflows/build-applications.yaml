@@ -422,7 +422,7 @@ jobs:
           echo "slack_icon_emoji=:skull:" >> $GITHUB_OUTPUT
 
       - name: Get previous workflow run
-        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
         id: get-previous-run
         if: always() && (github.event_name == 'schedule' || github.ref == 'refs/heads/main')
         with:
@@ -441,7 +441,7 @@ jobs:
       - name: Check specific matrix job
         id: check-matrix
         if: steps.get-previous-run.outputs.result
-        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
         with:
           script: |
             const run_id = ${{ steps.get-previous-run.outputs.result }};
