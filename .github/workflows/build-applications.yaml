@@ -461,7 +461,7 @@ jobs:
 
       - name: Notify Slack
         # if: inputs.sendNotifications == 'true' && ((steps.check-matrix.outputs.was-successful && env.app_status != 'true') || (!steps.check-matrix.outputs.was-successful && env.app_status == 'true'))
-        uses: rtCamp/action-slack-notify@65e6fc1ce697e2df8149d9ae9909acc5ec5599ce # v2.3.1
+        uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: nightly-stack-build
