@@ -340,6 +340,7 @@ jobs:
               echo "Actual: $(cat /tmp/${{ matrix.app.name }}/build/*)"
               exit 1
           fi
+          echo "app_status=true" >> $GITHUB_ENV
 
       - name: Download Digests
         if: ${{ matrix.app.publish_artifacts }}
@@ -395,6 +396,7 @@ jobs:
           docker buildx imagetools create \
               --tag ghcr.io/${{ env.LOWERCASE_REPO_OWNER }}/${{ matrix.app.name }}:${{ matrix.app.container_tag_name }} \
               $(printf 'ghcr.io/${{ env.LOWERCASE_REPO_OWNER }}/${{ matrix.app.name }}@sha256:%s ' *)
+          echo "app_status=true" >> $GITHUB_ENV
 
       - name: Inspect image
         if: ${{ matrix.app.publish_artifacts }}

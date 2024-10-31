@@ -3,27 +3,46 @@
 set -Eeuo pipefail
 set -x
 
-COSMOS_CHAIN_ID=${COSMOS_CHAIN_ID:-testchain}
-COSMOS_MONIKER=${COSMOS_MONIKER:-testchain-node}
-COSMOS_NODE_HOME=${NODE_HOME:-/config}
-COSMOS_START_CMD=${START_CMD:-start}
+export HOME="${NODE_HOME:-/config}"
+COSMOS_CHAIN_ID="${COSMOS_CHAIN_ID:-testchain}"
+COSMOS_MONIKER="${COSMOS_MONIKER:-testchain-node}"
+COSMOS_NODE_CMD=/app/node
+GENESIS_FILE="${HOME}/config/genesis.json"
 
-if [[ ! -f "${COSMOS_NODE_HOME}/config/config.toml" ]]; then
+if [[ ! -f "${HOME}/config/config.toml" ]]; then
     echo "Launch init procedure..."
-    /app/node config set client chain-id ${COSMOS_CHAIN_ID} --home ${COSMOS_NODE_HOME}
-    /app/node config set client keyring-backend test --home ${COSMOS_NODE_HOME}
-    /app/node keys add alice --indiscreet --home ${COSMOS_NODE_HOME}
-    /app/node keys add bob --indiscreet --home ${COSMOS_NODE_HOME}
-    /app/node init ${COSMOS_MONIKER} --chain-id ${COSMOS_CHAIN_ID} --home ${COSMOS_NODE_HOME}
-    jq '.app_state.gov.params.voting_period = "600s"' ${COSMOS_NODE_HOME}/config/genesis.json > temp.json && mv temp.json ${COSMOS_NODE_HOME}/config/genesis.json
-    jq '.app_state.gov.params.expedited_voting_period = "300s"' ${COSMOS_NODE_HOME}/config/genesis.json > temp.json && mv temp.json ${COSMOS_NODE_HOME}/config/genesis.json
-    jq '.app_state.mint.minter.inflation = "0.300000000000000000"' ${COSMOS_NODE_HOME}/config/genesis.json > temp.json && mv temp.json ${COSMOS_NODE_HOME}/config/genesis.json # to change the inflation
-    /app/node genesis add-genesis-account alice 5000000000stake --keyring-backend test --home ${COSMOS_NODE_HOME}
-    /app/node genesis add-genesis-account bob 5000000000stake --keyring-backend test --home ${COSMOS_NODE_HOME}
-    /app/node genesis gentx alice 1000000stake --chain-id ${COSMOS_CHAIN_ID} --home ${COSMOS_NODE_HOME}
-    /app/node genesis collect-gentxs --home ${COSMOS_NODE_HOME}
+
+    # Configure client settings
+    /app/node config set client chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
+    /app/node config set client keyring-backend test --home "${HOME}"
+
+    # Add keys
+    for user in validator faucet alice bob; do
+        "${COSMOS_NODE_CMD}" keys add "${user}" --indiscreet --home "${HOME}"
+    done
+
+    # Save mnemonics for specific users
+    for user in validator faucet; do
+        "${COSMOS_NODE_CMD}" keys mnemonic "${user}" --indiscreet >"${HOME}/${user}_mnemonic.txt" --home "${HOME}"
+    done
+
+    # Initialize node
+    "${COSMOS_NODE_CMD}" init "${COSMOS_MONIKER}" --chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
+
+    # Set governance and inflation parameters
+    jq '.app_state.gov.params.voting_period = "600s" |
+        .app_state.gov.params.expedited_voting_period = "300s" |
+        .app_state.mint.minter.inflation = "0.300000000000000000"' \
+        "${GENESIS_FILE}" >temp.json && mv temp.json "${GENESIS_FILE}"
+
+    # Add genesis accounts
+    for account in validator faucet alice bob; do
+        "${COSMOS_NODE_CMD}" genesis add-genesis-account "${account}" 5000000000stake --keyring-backend test --home "${HOME}"
+    done
+    "${COSMOS_NODE_CMD}" genesis gentx validator 1000000stake --chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
+    "${COSMOS_NODE_CMD}" genesis collect-gentxs --home "${HOME}"
 fi
 
 exec \
-    /app/node ${COSMOS_START_CMD} --home ${COSMOS_NODE_HOME} \
+    "${COSMOS_NODE_CMD}" start --home "${HOME}" \
     "$@"
