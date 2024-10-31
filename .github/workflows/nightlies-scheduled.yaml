@@ -35,8 +35,8 @@ jobs:
     name: Simple Checks
     uses: ./.github/workflows/simple-checks.yaml
 
-  build-images:
-    name: Build Images
+  build-applications:
+    name: Build Applications
     needs: simple-checks
     uses: ./.github/workflows/build-applications.yaml
     secrets: inherit

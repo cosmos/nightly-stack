@@ -461,17 +461,22 @@ jobs:
             console.log(`The specific matrix job was ${wasSuccessful ? 'successful' : 'not successful'}`);
             core.setOutput('was-successful', wasSuccessful);
 
-      - name: Notify Slack
-        # if: inputs.sendNotifications == 'true' && ((steps.check-matrix.outputs.was-successful && env.app_status != 'true') || (!steps.check-matrix.outputs.was-successful && env.app_status == 'true'))
-        uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_CHANNEL: nightly-stack-build
-          SLACK_USERNAME: Nightly Builds
-          SLACK_ICON_EMOJI: ${{ steps.build-failed.outputs.slack_icon_emoji || steps.build-success.outputs.slack_icon_emoji }}
-          SLACK_COLOR: ${{ steps.build-failed.outputs.slack_color || steps.build-success.outputs.slack_color }}
-          SLACK_MESSAGE: ${{ steps.build-failed.outputs.slack_message || steps.build-success.outputs.slack_message }}
-          SLACK_FOOTER: ""
+      # - name: Notify Slack
+      #   if: inputs.sendNotifications == 'true' && ((steps.check-matrix.outputs.was-successful && env.app_status != 'true') || (!steps.check-matrix.outputs.was-successful && env.app_status == 'true'))
+      #   uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      #     SLACK_CHANNEL: nightly-stack-build
+      #     SLACK_USERNAME: Nightly Builds
+      #     SLACK_ICON_EMOJI: ${{ steps.build-failed.outputs.slack_icon_emoji || steps.build-success.outputs.slack_icon_emoji }}
+      #     SLACK_COLOR: ${{ steps.build-failed.outputs.slack_color || steps.build-success.outputs.slack_color }}
+      #     SLACK_MESSAGE: ${{ steps.build-failed.outputs.slack_message || steps.build-success.outputs.slack_message }}
+      #     SLACK_FOOTER: ""
+
+      - name: Check specific matrix job
+        if: inputs.sendNotifications == 'true' && ((steps.check-matrix.outputs.was-successful && env.app_status != 'true') || (!steps.check-matrix.outputs.was-successful && env.app_status == 'true'))
+        run:
+          echo debug
 
 
   # Summarize matrix https://github.community/t/status-check-for-a-matrix-jobs/127354/7
