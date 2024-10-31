@@ -1,0 +1,12 @@
+---
+- name: Systemd_enableservices_nonroot
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    daemon_reload: true
+    scope: user
+    enabled: true
+    state: restarted
+  loop:
+    - cancri-1-validator-1
+  become: true
+  become_user: nonroot

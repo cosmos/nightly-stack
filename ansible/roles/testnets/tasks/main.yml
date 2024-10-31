@@ -1,0 +1,5 @@
+---
+- name: Cancri-1 Testnet
+  ansible.builtin.include_tasks: cancri-1.yml
+  tags:
+    - cancri-1
