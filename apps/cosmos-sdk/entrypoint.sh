@@ -22,16 +22,6 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
         "${COSMOS_NODE_CMD}" keys add "${user}" --home "${HOME}"
     done
 
-    # Save mnemonics for specific users
-    if [[ $("${COSMOS_NODE_CMD}" keys mnemonic --help) == *"--indiscreet"* ]]; then
-        INDISCREET_FLAG="--indiscreet"
-    else
-        INDISCREET_FLAG=""
-    fi
-    for user in validator faucet; do
-        "${COSMOS_NODE_CMD}" keys mnemonic "${user}" "${INDISCREET_FLAG}" >"${HOME}/${user}_mnemonic.txt" --home "${HOME}"
-    done
-
     # Initialize node
     "${COSMOS_NODE_CMD}" init "${COSMOS_MONIKER}" --chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
 

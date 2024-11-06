@@ -22,11 +22,6 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
         "${COSMOS_NODE_CMD}" keys add "${user}" --home "${HOME}"
     done
 
-    # Save mnemonics for specific users
-    for user in validator faucet; do
-        "${COSMOS_NODE_CMD}" keys mnemonic "${user}" >"${HOME}/${user}_mnemonic.txt" --home "${HOME}"
-    done
-
     # Initialize node
     "${COSMOS_NODE_CMD}" init "${COSMOS_MONIKER}" --chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
 
