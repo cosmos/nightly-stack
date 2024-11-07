@@ -3,10 +3,11 @@
 
 * **Chain-ID**: `052-1`
 * **denom**: `stake`
-* **Current Cosmos SDK upstream**: [`v0.52.x`](https://github.com/cosmos/cosmos-sdk/tree/release/v0.52.x)
+* **Application**: [`Simapp - Cosmos-SDK v0.52.x`](https://github.com/cosmos/cosmos-sdk/tree/release/v0.52.x/simapp)
+* **Binary**: [Download from latest workflow execution](https://github.com/cosmos/nightly-stack/actions/workflows/nightlies-scheduled.yaml) - Filename : `cosmos-sdk-v0.52.x-mods-<os>-<arch>`
 * **Genesis File:**  genesis.json, verify with `shasum -a 256 genesis.json`
 * **Genesis sha256sum**: `338d368ad23941dffe5ce92799b766dc2aa4b4c53fb320f6fe648ff1b427612d`
-* Launch Date: 2024-10-04
+* Launch Date: 2024-31-04
 
 ## Endpoints
 
@@ -17,7 +18,7 @@
 
 ### gRPC
 
-`https://052-1-testnet-grpc.interchainsdk.io:443`
+`052-1-testnet-grpc.interchainsdk.io:443`
 
 
 ### RPC
