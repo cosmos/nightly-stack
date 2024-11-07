@@ -14,6 +14,12 @@
 
 `https://050-1-testnet-api.interchainsdk.io:443`
 
+
+### gRPC
+
+`https://050-1-testnet-grpc.interchainsdk.io:443`
+
+
 ### RPC
 
 `https://050-1-testnet-rpc.interchainsdk.io:443`
@@ -21,7 +27,7 @@
 
 ### Seed
 
-`5164d2523f7ffec3bbfdd9cf49b638477bdb53bc@050-1-testnet-p2p.interchainsdk.io`
+`5164d2523f7ffec3bbfdd9cf49b638477bdb53bc@050-1-testnet-p2p.interchainsdk.io:20056`
 
 
 ### Block Explorers

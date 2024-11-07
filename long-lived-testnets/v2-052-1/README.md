@@ -15,11 +15,16 @@
 `https://v2-052-1-testnet-rpc.interchainsdk.io:443`
 
 
+### gRPC
+
+`https://v2-052-1-testnet-grpc.interchainsdk.io:443`
+
+
+### REST
+
+`https://v2-052-1-testnet-rest.interchainsdk.io:443`
+
+
 ### Seed
 
-`14492908ff9181e35b653e577dcf175d0f6be36b@v2-052-1-testnet.interchainsdk.io:20256`
-
-
-### Faucet
-
-`https://faucet-testnet.interchainsdk.io/`
+`14492908ff9181e35b653e577dcf175d0f6be36b@-p2p.interchainsdk.io:20256`
