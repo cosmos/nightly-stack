@@ -4,6 +4,20 @@
 
 This repository contains the nightly builds of the Interchain Stack. The Interchain Stack is a collection of software that enables the creation of decentralized applications that are interoperable with other blockchains. The stack includes the Cosmos SDK, IBC, and CW.
 
+## Long-Lived testnets
+
+We currently are running multiple testnets, each one running a specific versions of cosmos-sdk.
+Binary Builds validators are updated daily, with the latest commits on both sdk and modules. The complete update logic can be found in `.github/scripts/update-go-modules.sh`
+
+### Status
+https://status.interchainsdk.io/status/testnets
+
+### Live Chains
+- 0-50-1
+- 0-52-1
+- v2-0-52-1
+
+
 ## Nightlies Scheduled workflow
 
 The workflow runs once a day, and will publish artifacts (binary and container image) following the specification inside .`/apps/<app_name>/metadata.yaml`
