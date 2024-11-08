@@ -3,7 +3,7 @@
 
 * **Chain-ID**: `v2-052-1`
 * **denom**: `stake`
-* **Application**: [`Simapp - Cosmos-SDK v0.50.x`](https://github.com/cosmos/cosmos-sdk/tree/release/v0.50.x/simapp)
+* **Application**: [`Simapp - Cosmos-SDK v0.52.x`](https://github.com/cosmos/cosmos-sdk/tree/release/v0.52.x/simapp)
 * **Binary**: [Download from latest workflow execution](https://github.com/cosmos/nightly-stack/actions/workflows/nightlies-scheduled.yaml) - Filename : `cosmos-sdk-v2-v0.52.x-mods-<os>-<arch>`
 * **Genesis File:**  genesis.json, verify with `shasum -a 256 genesis.json`
 * **Genesis sha256sum**: `338d368ad23941dffe5ce92799b766dc2aa4b4c53fb320f6fe648ff1b427612d`
@@ -29,3 +29,11 @@
 ### Seed
 
 `14492908ff9181e35b653e577dcf175d0f6be36b@-p2p.interchainsdk.io:20256`
+
+## How to join
+
+```bash
+./cosmos-sdk-v2-v0.52.x-mods-<os>-<arch> init <moniker> --chain-id "v2-052-1"
+wget --quiet --output-document ~/.simappv2/config/genesis.json https://raw.githubusercontent.com/cosmos/nightly-stack/refs/heads/main/long-lived-testnets/v2-052-1/genesis.json
+./cosmos-sdk-v2-v0.52.x-mods-<os>-<arch> start
+```

@@ -31,6 +31,17 @@
 `4fdd35e73406fb29af21a5ca2cd1637aaee9c45e@052-1-testnet-p2p.interchainsdk.io:20156`
 
 
+## How to join
+
+```bash
+./cosmos-sdk-v0.52.x-mods-<os>-<arch> init <moniker> --chain-id "052-1"
+wget --quiet --output-document ~/.simappv2/config/genesis.json https://raw.githubusercontent.com/cosmos/nightly-stack/refs/heads/main/long-lived-testnets/052-1/genesis.json
+./cosmos-sdk-v0.52.x-mods-<os>-<arch> start
+```
+
+
+## Utilities
+
 ### Block Explorers
 
 `https://explorer-testnet.interchainsdk.io/`
