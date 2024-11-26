@@ -1,39 +1,38 @@
+# Chain Details: `v2-052-1`
 
-# `v2-052-1` Chain Details
+## Basic Information
 
-* **Chain-ID**: `v2-052-1`
-* **denom**: `stake`
-* **Application**: [`Simapp - Cosmos-SDK v0.52.x`](https://github.com/cosmos/cosmos-sdk/tree/release/v0.52.x/simapp)
-* **Binary**: [Download from latest workflow execution](https://github.com/cosmos/nightly-stack/actions/workflows/nightlies-scheduled.yaml) - Filename : `cosmos-sdk-v2-v0.52.x-mods-<os>-<arch>`
-* **Genesis File:**  genesis.json, verify with `shasum -a 256 genesis.json`
-* **Genesis sha256sum**: `338d368ad23941dffe5ce92799b766dc2aa4b4c53fb320f6fe648ff1b427612d`
-* Launch Date: 2024-31-04
+- **Chain-ID:** `v2-052-1`
+- **Denom:** `stake`
+- **Application:** [Simapp - Cosmos-SDK v0.52.x](https://github.com/cosmos/cosmos-sdk/tree/release/v0.52.x/simapp)
+- **Binary:** [Download Latest Build](https://github.com/cosmos/nightly-stack/actions/workflows/nightlies-scheduled.yaml)
+  - Filename: `cosmos-sdk-v2-v0.52.x-mods-<os>-<arch>`
+- **Genesis File:** `genesis.json`
+  - SHA256: `338d368ad23941dffe5ce92799b766dc2aa4b4c53fb320f6fe648ff1b427612d`
+- **Launch Date:** 2024-11-26
 
-## Endpoints
+## Network Endpoints
 
-### RPC
+| Service | Endpoint                                                                               |
+| ------- | -------------------------------------------------------------------------------------- |
+| RPC     | `https://v2-052-1-testnet-rpc.interchainsdk.io:443`                                    |
+| gRPC    | `v2-052-1-testnet-grpc.interchainsdk.io:443`                                           |
+| REST    | `https://v2-052-1-testnet-rest.interchainsdk.io:443`                                   |
+| Seed    | `14492908ff9181e35b653e577dcf175d0f6be36b@v2-052-1-testnet-p2p.interchainsdk.io:20256` |
 
-`https://v2-052-1-testnet-rpc.interchainsdk.io:443`
+## Join the Network
 
-
-### gRPC
-
-`v2-052-1-testnet-grpc.interchainsdk.io:443`
-
-
-### REST
-
-`https://v2-052-1-testnet-rest.interchainsdk.io:443`
-
-
-### Seed
-
-`14492908ff9181e35b653e577dcf175d0f6be36b@-p2p.interchainsdk.io:20256`
-
-## How to join
+To join the network, execute the following commands:
 
 ```bash
-./cosmos-sdk-v2-v0.52.x-mods-<os>-<arch> init <moniker> --chain-id "v2-052-1"
-wget --quiet --output-document ~/.simappv2/config/genesis.json https://raw.githubusercontent.com/cosmos/nightly-stack/refs/heads/main/long-lived-testnets/v2-052-1/genesis.json
+# Initialize the node
+./cosmos-sdk-v2-v0.52.x-mods-<os>-<arch> init <moniker> --chain-id v2-052-1
+
+# Download genesis file
+wget --quiet --output-document ~/.simappv2/config/genesis.json https://raw.githubusercontent.com/cosmos/nightly-stack/refs/heads/main/short-lived-testnets/v2-052-1/genesis.json
+
+# Start the node
 ./cosmos-sdk-v2-v0.52.x-mods-<os>-<arch> start
+
+> Note: Replace <os>, <arch>, and <moniker> with your operating system, architecture, and desired node name respectively.
 ```
