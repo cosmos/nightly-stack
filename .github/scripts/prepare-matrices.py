@@ -90,6 +90,9 @@ def get_app_metadata(subdir, meta, forRelease=False, channels=None):
             if meta.get("binary_name"):
                 platformToBuild["binary_name"] = meta["binary_name"]
 
+            if meta.get("binary_build_output_path"):
+                platformToBuild["binary_build_output_path"] = meta["binary_build_output_path"]
+
             platformToBuild["update_modules_enabled"] = channel["update_modules"]["enabled"]
             if channel["update_modules"]["enabled"]:
                 platformToBuild["update_modules_branch"] = channel["update_modules"]["cosmossdk_branch"]

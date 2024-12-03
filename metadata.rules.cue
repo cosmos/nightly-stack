@@ -6,6 +6,7 @@
     fetch_full_history?: bool
     publish_artifacts: bool
     binary_name?: string
+    binary_build_output_path?: string
     channels: [...#Channels]
 }
 
