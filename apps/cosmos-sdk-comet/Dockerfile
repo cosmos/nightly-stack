@@ -8,6 +8,7 @@ USER root
 
 COPY ./$BINARY /app/node
 
+# trunk-ignore(hadolint/DL3018)
 RUN apk update && \
   apk add --no-cache \
     bash \
