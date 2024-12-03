@@ -6,7 +6,7 @@ set -x
 export HOME="${NODE_HOME:-/config}"
 COSMOS_CHAIN_ID="${COSMOS_CHAIN_ID:-testchain}"
 COSMOS_MONIKER="${COSMOS_MONIKER:-testchain-node}"
-COSMOS_NODE_CMD=/app/node
+COSMOS_NODE_CMD=/app/wasmd
 GENESIS_FILE="${HOME}/config/genesis.json"
 PASSWORD=${PASSWORD:-1234567890}
 
@@ -14,8 +14,10 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
     echo "Launch init procedure..."
 
     # Configure client settings
-    /app/node config set client chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
-    /app/node config set client keyring-backend test --home "${HOME}"
+    "${COSMOS_NODE_CMD}" config set client chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
+    "${COSMOS_NODE_CMD}" config set client keyring-backend test  --home "${HOME}"
+    sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0.002token1"/' "${HOME}/config/app.toml"
+    "${COSMOS_NODE_CMD}" config set app api.enable true --home "${HOME}"
 
     # Add keys
     for user in validator faucet alice bob; do
@@ -33,10 +35,10 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
 
     # Add genesis accounts
     for account in validator faucet alice bob; do
-        echo "${PASSWORD}" | "${COSMOS_NODE_CMD}" genesis add-genesis-account "${account}" 5000000000stake --keyring-backend test --home "${HOME}"
+        echo "${PASSWORD}" | "${COSMOS_NODE_CMD}" genesis add-genesis-account "${account}" 5000000000stake --home "${HOME}"
     done
-    "${COSMOS_NODE_CMD}" genesis gentx validator 1000000stake --chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
-    "${COSMOS_NODE_CMD}" genesis collect-gentxs --home "${HOME}"
+    echo "${PASSWORD}" | "${COSMOS_NODE_CMD}" genesis gentx validator 1000000stake --chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
+    echo "${PASSWORD}" | "${COSMOS_NODE_CMD}" genesis collect-gentxs --home "${HOME}"
 fi
 
 exec \

@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -oue pipefail
-
 ## FUNCTIONS
 
 # Function to get the latest commit SHA for a given repo and branch
@@ -46,6 +45,9 @@ replace_module() {
 
     go mod edit -replace=$module=$module@$pseudo_version
 
+    go mod verify
+    go mod tidy
+
     return 0
 }
 
@@ -73,6 +75,8 @@ check_replaced_local() {
     if [ $? -ne 0 ]; then
         return 1
     else
+        go mod verify
+        go mod tidy
         return 0
     fi
 }
@@ -130,19 +134,16 @@ for module in $modules; do
                 elif [[ "$COSMOSSDK_BRANCH" =~ "v0.52.x" ]]; then
                     case "$module" in
                         # Force checking specific modules to HEAD of refs/heads/release/v0.52.x instead of main
-                        *client/v2*|*x/*)
+                        *api*|*client/v2*|*x/*)
                             # Exception for x/tx
-                            if [[ "$module" =~ "x/tx" ]]; then
+                            if [[ "$module" =~ "x/tx" ]] || [[ "$module" =~ "api" ]]; then
                                 if ! replace_module "$cosmossdk_latest_commit_main"; then
                                     echo "Failed to update module $module after trying main."
                                     exit 1
                                 fi
-                            elif ! replace_module "$cometbft_latest_commit_branch"; then
-                            echo "Failed to update module $module after trying main."
-                            exit 1
-                                if ! replace_module "$cosmossdk_latest_commit_branch"; then
-                                    echo "Failed to update module $module after trying $COSMOSSDK_BRANCH."
-                                fi
+                            elif ! replace_module "$cosmossdk_latest_commit_branch"; then
+                                echo "Failed to update module $module after trying main."
+                                exit 1
                             fi
                             ;;
                         *errors*)
@@ -156,8 +157,7 @@ for module in $modules; do
                     esac
                 fi
                 ;;
-            *github.com/cosmos/cosmos-sdk*)
-
+            *cosmos-sdk*)
                 # modules that need to follow HEAD on release branch
                 if ! replace_module "$cosmossdk_latest_commit_branch"; then
                     echo "Failed to update module $module after trying $COSMOSSDK_BRANCH."
@@ -179,7 +179,5 @@ for module in $modules; do
     else
         echo "module $module is already replaced by local path"
     fi
-done
 
-go mod verify
-go mod tidy
+done
