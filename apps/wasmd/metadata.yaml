@@ -1,0 +1,24 @@
+---
+app: wasmd
+repository: CosmWasm/wasmd
+path: ./
+fetch_full_history: true
+publish_artifacts: true
+binary_name: wasmd
+channels:
+  - name: v0.52.x
+    branch: upgrade_sdk_0.52
+    platforms: [linux/amd64,linux/arm64]
+    container_tag_name: "0.52"
+    update_modules:
+      enabled: false
+      cosmossdk_branch: refs/heads/release/v0.52.x
+    tests_enabled: true
+  - name: v0.52.x-mods
+    branch: upgrade_sdk_0.52
+    platforms: [linux/amd64,linux/arm64]
+    container_tag_name: 0.52-mods
+    update_modules:
+      enabled: true
+      cosmossdk_branch: refs/heads/release/v0.52.x
+    tests_enabled: true
