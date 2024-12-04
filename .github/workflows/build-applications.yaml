@@ -436,54 +436,75 @@ jobs:
         with:
           script: |
             const branch = context.ref.replace('refs/heads/', '');
-            const runs = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'nightlies-scheduled.yaml',
-              branch: branch,
-              status: 'completed',
-              per_page: 1
-            });
-            return runs.data.workflow_runs[0].id;
+            try {
+              const runs = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'nightlies-scheduled.yaml',
+                branch: branch,
+                status: 'completed',
+                per_page: 1
+              });
+
+              if (!runs.data.workflow_runs.length) {
+                console.log('No previous workflow runs found');
+                return '';
+              }
+              return runs.data.workflow_runs[0].id;
+            } catch (error) {
+              console.error('Error fetching workflow runs:', error);
+              return '';
+            }
 
       - name: Check specific matrix job
         id: check-matrix
-        if: steps.get-previous-run.outputs.result
+        if: steps.get-previous-run.outputs.result != ''
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
         with:
           script: |
             const run_id = ${{ steps.get-previous-run.outputs.result }};
-            const jobs = await github.rest.actions.listJobsForWorkflowRun({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: run_id
-            });
+            try {
+              const jobs = await github.rest.actions.listJobsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: run_id
+              });
 
-            const specificJob = jobs.data.jobs.find(job =>
-              job.name === 'Build Images / Merge ${{ matrix.app.name }} ${{ matrix.app.channel }}'
-            );
+              const expectedJobName = `Build Applications / Merge ${{ matrix.app.name }} ${{ matrix.app.channel }}`;
+              console.log('Looking for job with name:', expectedJobName);
 
-            const wasSuccessful = specificJob && specificJob.conclusion === 'success';
-            console.log(`The specific matrix job was ${wasSuccessful ? 'successful' : 'not successful'}`);
-            core.setOutput('was-successful', wasSuccessful);
+              console.log('Available jobs:');
+              jobs.data.jobs.forEach(job => {
+                console.log(`- ${job.name} (${job.conclusion})`);
+              });
 
-      # - name: Notify Slack
-      #   if: inputs.sendNotifications == 'true' && ((steps.check-matrix.outputs.was-successful && env.app_status != 'true') || (!steps.check-matrix.outputs.was-successful && env.app_status == 'true'))
-      #   uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
-      #   env:
-      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      #     SLACK_CHANNEL: nightly-stack-build
-      #     SLACK_USERNAME: Nightly Builds
-      #     SLACK_ICON_EMOJI: ${{ steps.build-failed.outputs.slack_icon_emoji || steps.build-success.outputs.slack_icon_emoji }}
-      #     SLACK_COLOR: ${{ steps.build-failed.outputs.slack_color || steps.build-success.outputs.slack_color }}
-      #     SLACK_MESSAGE: ${{ steps.build-failed.outputs.slack_message || steps.build-success.outputs.slack_message }}
-      #     SLACK_FOOTER: ""
+              const specificJob = jobs.data.jobs.find(job => job.name === expectedJobName);
 
-      - name: Check specific matrix job
+              if (!specificJob) {
+                console.log('Job not found!');
+                core.setOutput('was-successful', false);
+                return;
+              }
+
+              const wasSuccessful = specificJob.conclusion === 'success';
+              console.log(`Found job. Conclusion: ${specificJob.conclusion}`);
+              core.setOutput('was-successful', wasSuccessful);
+            } catch (error) {
+              console.error('Error checking job status:', error);
+              core.setOutput('was-successful', false);
+            }
+
+      - name: Notify Slack
         if: inputs.sendNotifications == 'true' && ((steps.check-matrix.outputs.was-successful && env.app_status != 'true') || (!steps.check-matrix.outputs.was-successful && env.app_status == 'true'))
-        run:
-          echo debug
-
+        uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: nightly-stack-build
+          SLACK_USERNAME: Nightly Builds
+          SLACK_ICON_EMOJI: ${{ steps.build-failed.outputs.slack_icon_emoji || steps.build-success.outputs.slack_icon_emoji }}
+          SLACK_COLOR: ${{ steps.build-failed.outputs.slack_color || steps.build-success.outputs.slack_color }}
+          SLACK_MESSAGE: ${{ steps.build-failed.outputs.slack_message || steps.build-success.outputs.slack_message }}
+          SLACK_FOOTER: ""
 
   # Summarize matrix https://github.community/t/status-check-for-a-matrix-jobs/127354/7
   build_success:
