@@ -13,10 +13,10 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
     echo "Launch init procedure..."
 
     # Configure client settings
-    /app/node config set client chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
-    /app/node config set client keyring-backend test  --home "${HOME}"
+    "${COSMOS_NODE_CMD}" config set client chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
+    "${COSMOS_NODE_CMD}" config set client keyring-backend test  --home "${HOME}"
     sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0.002token1"/' "${HOME}/config/app.toml"
-    /app/node config set app api.enable true --home "${HOME}"
+    "${COSMOS_NODE_CMD}" config set app api.enable true --home "${HOME}"
 
     # Add keys
     for user in validator faucet alice bob; do

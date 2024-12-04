@@ -6,7 +6,7 @@ set -x
 export HOME="${NODE_HOME:-/config}"
 COSMOS_CHAIN_ID="${COSMOS_CHAIN_ID:-testchain}"
 COSMOS_MONIKER="${COSMOS_MONIKER:-testchain-node}"
-COSMOS_NODE_CMD=/app/wasmd
+COSMOS_NODE_CMD=/app/node
 GENESIS_FILE="${HOME}/config/genesis.json"
 PASSWORD=${PASSWORD:-1234567890}
 

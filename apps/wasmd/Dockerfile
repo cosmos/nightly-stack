@@ -35,7 +35,7 @@ RUN apk add --no-cache \
   jq \
   tini
 
-COPY --from=go-builder /code/build/wasmd /app/wasmd
+COPY --from=go-builder /code/build/wasmd /app/node
 COPY ./entrypoint.sh /entrypoint.sh
 
 WORKDIR /app
