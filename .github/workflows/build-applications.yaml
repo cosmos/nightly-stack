@@ -429,73 +429,40 @@ jobs:
           echo "slack_color=danger" >> $GITHUB_OUTPUT
           echo "slack_icon_emoji=:skull:" >> $GITHUB_OUTPUT
 
-      - name: Get previous workflow run
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
-        id: get-previous-run
-        if: always() && (github.event_name == 'schedule' || github.ref == 'refs/heads/main')
-        with:
-          script: |
-            const branch = context.ref.replace('refs/heads/', '');
-            try {
-              const runs = await github.rest.actions.listWorkflowRuns({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'nightlies-scheduled.yaml',
-                branch: branch,
-                status: 'completed',
-                per_page: 1
-              });
+      - name: Get previous workflow job status
+        id: previous-run
+        shell: bash
+        run: |
+          REPO="${GITHUB_REPOSITORY}"
+          # https://api.github.com/repos/cosmos/nightly-stack/actions/workflows
+          WORKFLOW_ID="119041783"
+          JOB_NAME="Build Applications / Merge ${{ matrix.app.name }} ${{ matrix.app.channel }}"
 
-              if (!runs.data.workflow_runs.length) {
-                console.log('No previous workflow runs found');
-                return '';
-              }
-              return runs.data.workflow_runs[0].id;
-            } catch (error) {
-              console.error('Error fetching workflow runs:', error);
-              return '';
-            }
+          # Get the previous workflow run ID (excluding the current one)
+          PREVIOUS_RUN_ID=$(curl -s -H "Authorization: token ${{ github.token }}" \
+            "https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW_ID}/runs?per_page=2" \
+            | jq -r '.workflow_runs[1].id')
 
-      - name: Check specific matrix job
-        id: check-matrix
-        if: steps.get-previous-run.outputs.result != ''
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
-        with:
-          script: |
-            const run_id = ${{ steps.get-previous-run.outputs.result }};
-            try {
-              const jobs = await github.rest.actions.listJobsForWorkflowRun({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: run_id
-              });
+          # Get the jobs for that specific run
+          PREVIOUS_STATUS=$(curl -s -H "Authorization: token ${{ github.token }}" \
+            "https://api.github.com/repos/${REPO}/actions/runs/${PREVIOUS_RUN_ID}/jobs" \
+            | jq -r --arg JOB_NAME "$JOB_NAME" '.jobs[] | select(.name == $JOB_NAME) | .conclusion')
 
-              const expectedJobName = `Build Applications / Merge ${{ matrix.app.name }} ${{ matrix.app.channel }}`;
-              console.log('Looking for job with name:', expectedJobName);
+          echo "previous_status=${PREVIOUS_STATUS}" >> $GITHUB_OUTPUT
 
-              console.log('Available jobs:');
-              jobs.data.jobs.forEach(job => {
-                console.log(`- ${job.name} (${job.conclusion})`);
-              });
+          # If PREVIOUS_STATUS is empty, set it to "unknown"
+          PREVIOUS_STATUS=${PREVIOUS_STATUS:-unknown}
 
-              const specificJob = jobs.data.jobs.find(job => job.name === expectedJobName);
-
-              if (!specificJob) {
-                console.log('Job not found!');
-                core.setOutput('was-successful', false);
-                return;
-              }
-
-              const wasSuccessful = specificJob.conclusion === 'success';
-              console.log(`Found job. Conclusion: ${specificJob.conclusion}`);
-              core.setOutput('was-successful', wasSuccessful);
-            } catch (error) {
-              console.error('Error checking job status:', error);
-              core.setOutput('was-successful', false);
-            }
+          echo "previous_status=${PREVIOUS_STATUS}" >> $GITHUB_OUTPUT
 
       - name: Notify Slack
-        if: inputs.sendNotifications == 'true' && ((steps.check-matrix.outputs.was-successful && env.app_status != 'true') || (!steps.check-matrix.outputs.was-successful && env.app_status == 'true'))
+        if: |
+          inputs.sendNotifications == 'true' &&
+          (
+            steps.previous-run.outputs.previous_status == 'unknown' ||
+            (env.app_status != 'true' && steps.previous-run.outputs.previous_status != 'failure') ||
+            (env.app_status == 'true' && steps.previous-run.outputs.previous_status != 'success')
+          )
         uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
