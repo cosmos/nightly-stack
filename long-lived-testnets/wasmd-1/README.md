@@ -8,8 +8,8 @@
 - **Binary:** [Download Latest Build](https://github.com/cosmos/nightly-stack/actions/workflows/nightlies-scheduled.yaml)
   - Filename: `wasmd-v0.52.x-<os>-<arch>`
 - **Genesis File:** `genesis.json`
-  - SHA256: `bbd1047cce76beca238247632fc7a2d7fdfa14dc34ad909ae061f9d7184d11c7`
-- **Launch Date:** 2024-11-26
+  - SHA256: `7deff113b8fc6ef743092f3819c248cb8d186ca0b40f7220b2533b3498b26d84`
+- **Launch Date:** 2024-12-05
 
 ## Network Endpoints
 
@@ -18,7 +18,7 @@
 | API     | `https://wasmd-1-testnet-api.interchainsdk.io:443`                                    |
 | gRPC    | `wasmd-1-testnet-grpc.interchainsdk.io:443`                                           |
 | RPC     | `https://wasmd-1-testnet-rpc.interchainsdk.io:443`                                    |
-| Seed    | `c9b00dcf8f9646c768c7cfcce855e23e97a8f2bc@wasmd-1-testnet-p2p.interchainsdk.io:20056` |
+| Seed    | `c1946bc2c95b23c6e09a6bbc0e2d9807d81646b1@wasmd-1-testnet-p2p.interchainsdk.io:20356` |
 
 ## Join the Network
 
