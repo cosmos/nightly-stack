@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.23-alpine3.19 AS go-builder
+FROM docker.io/library/golang:1.23-alpine3.19@sha256:5f3336882ad15d10ac1b59fbaba7cb84c35d4623774198b36ae60edeba45fd84 AS go-builder
 
 WORKDIR /code
 
@@ -27,7 +27,7 @@ RUN echo "Ensuring binary is statically linked ..." \
   && (file /code/build/wasmd | grep "statically linked")
 
 # --------------------------------------------------------
-FROM docker.io/library/alpine:3.18
+FROM docker.io/library/alpine:3.18@sha256:2995c82e8e723d9a5c8585cb8e901d1c50e3c2759031027d3bff577449435157
 
 # trunk-ignore(hadolint/DL3018)
 RUN apk add --no-cache \
