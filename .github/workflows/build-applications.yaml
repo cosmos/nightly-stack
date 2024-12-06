@@ -433,6 +433,7 @@ jobs:
         id: previous-run
         shell: bash
         run: |
+          set -x
           REPO="${GITHUB_REPOSITORY}"
           # https://api.github.com/repos/cosmos/nightly-stack/actions/workflows
           WORKFLOW_ID="119041783"
