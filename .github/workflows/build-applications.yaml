@@ -160,7 +160,7 @@ jobs:
 
       - name: Upload Build Result
         if: ${{ !matrix.app.publish_artifacts }}
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
         with:
           name: wfl-build-${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ matrix.app.target_os }}-${{ matrix.app.target_arch }}
           path: /tmp/${{ matrix.app.name }}/*
@@ -191,7 +191,7 @@ jobs:
 
       - name: Upload Artifact
         if: ${{ matrix.app.publish_artifacts }}
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
         with:
           name: ${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ matrix.app.target_os }}-${{ matrix.app.target_arch }}
           path: ${{ github.workspace }}/${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ matrix.app.target_os }}-${{ matrix.app.target_arch }}
@@ -289,7 +289,7 @@ jobs:
 
       - name: Upload Digest
         if: ${{ matrix.app.publish_artifacts }}
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
         with:
           name: wfl-digest-${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ matrix.app.target_os }}-${{ matrix.app.target_arch }}
           path: /tmp/${{ matrix.app.name }}/*
