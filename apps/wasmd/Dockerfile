@@ -29,6 +29,8 @@ RUN echo "Ensuring binary is statically linked ..." \
 # --------------------------------------------------------
 FROM docker.io/library/alpine:3.18
 
+ENV HOME=/config
+
 # trunk-ignore(hadolint/DL3018)
 RUN apk add --no-cache \
   bash \

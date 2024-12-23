@@ -2,6 +2,8 @@ FROM cgr.dev/chainguard/wolfi-base:latest@sha256:3b271f8bff9356a38aa23118ffdea3c
 
 ARG BINARY
 
+ENV HOME=/config
+
 WORKDIR /app
 
 USER root
