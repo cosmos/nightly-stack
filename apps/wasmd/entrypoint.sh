@@ -33,16 +33,16 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
         echo "Launch genesis procedure..."
 
         # Set governance and inflation parameters
-        jq '.app_state.gov.params.voting_period = "600s" |
+        jq '.app_state.gov.params.voting_period = "20s" |
             .app_state.gov.params.expedited_voting_period = "300s" |
             .app_state.mint.minter.inflation = "0.300000000000000000"' \
             "${GENESIS_FILE}" >temp.json && mv temp.json "${GENESIS_FILE}"
 
         # Add genesis accounts
         for account in validator faucet alice bob; do
-            echo "${PASSWORD}" | "${COSMOS_NODE_CMD}" genesis add-genesis-account "${account}" 5000000000stake --home "${HOME}"
+            echo "${PASSWORD}" | "${COSMOS_NODE_CMD}" genesis add-genesis-account "${account}" 5000000000000stake --home "${HOME}"
         done
-        echo "${PASSWORD}" | "${COSMOS_NODE_CMD}" genesis gentx validator 1000000stake --chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
+        echo "${PASSWORD}" | "${COSMOS_NODE_CMD}" genesis gentx validator 1000000000stake --chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
         echo "${PASSWORD}" | "${COSMOS_NODE_CMD}" genesis collect-gentxs --home "${HOME}"
     fi
 fi
