@@ -10,6 +10,7 @@ COSMOS_MONIKER="${COSMOS_MONIKER:-testchain-node}"
 COSMOS_NODE_CMD=/app/node
 GENESIS_ENABLED="${GENESIS_ENABLED:-true}"
 GENESIS_VALIDATORS_NUMBER="${GENESIS_VALIDATORS_NUMBER:-1}"
+GENESIS_VALIDATOR_MAIN="${GENESIS_VALIDATOR_MAIN:-${COSMOS_CHAIN_ID}-node-1}"
 GENESIS_FILE="${HOME}/config/genesis.json"
 
 TIMEOUT=600  # Timeout in seconds
@@ -27,7 +28,7 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
     "${COSMOS_NODE_CMD}" init "${COSMOS_MONIKER}" --chain-id "${COSMOS_CHAIN_ID}" --home "${HOME}"
 
     # Get validator position
-    if [ "$GENESIS_VALIDATORS_NUMBER" -gt 1 ]; then
+    if [[ "${GENESIS_VALIDATORS_NUMBER}" -gt 1 ]]; then
         VALIDATOR_POSITION="${COSMOS_MONIKER: -1}"
         if [[ "${VALIDATOR_POSITION}" =~ ^[0-9]$ ]]; then
             export validator="validator-${VALIDATOR_POSITION}"
@@ -39,7 +40,7 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
 
     # Add validator keys
     validator="${validator:-validator}"
-    if [ "$GENESIS_VALIDATORS_NUMBER" -gt 1 ]; then
+    if [[ "${GENESIS_VALIDATORS_NUMBER}" -gt 1 ]]; then
         # export keys on shared volume
         "${COSMOS_NODE_CMD}" keys add "${validator}" --home "${HOME}" 2>&1 1>/dev/null | tail -n 1 > "${SHARED_VOLUME}/${validator}.mnemonic"
     else
@@ -60,14 +61,14 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
         "${COSMOS_NODE_CMD}" genesis add-genesis-account faucet 5000000000000stake --keyring-backend test --home "${HOME}"
 
         # validator add-genesis-account
-        if [ "$GENESIS_VALIDATORS_NUMBER" -gt 1 ]; then
+        if [[ "${GENESIS_VALIDATORS_NUMBER}" -gt 1 ]]; then
             # add genesis-accounts for every validator
-            for ((i=1; i<=$GENESIS_VALIDATORS_NUMBER; i++)); do
-                if [ "${validator}" != "validator-${i}" ]; then
+            for ((i=1; i<=${GENESIS_VALIDATORS_NUMBER}; i++)); do
+                if [[ "${validator}" != "validator-${i}" ]]; then
                     MNEMONIC_FILE="${SHARED_VOLUME}/validator-${i}.mnemonic"
                     FOUND=false
 
-                    while [ "$FOUND" = false ]; do
+                    while [[ "${FOUND}" = false ]]; do
                         CURRENT_TIME=$(date +%s)
                         ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
 
@@ -77,7 +78,7 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
                             exit 1
                         fi
 
-                        if [ -f "$MNEMONIC_FILE" ]; then
+                        if [[ -f "${MNEMONIC_FILE}" ]]; then
                             echo "Found key file: ${MNEMONIC_FILE}"
                             echo $(cat "${MNEMONIC_FILE}") | "${COSMOS_NODE_CMD}" keys add "validator-${i}" --recover --home "${HOME}" || true
                             FOUND=true
@@ -99,6 +100,14 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
         "${COSMOS_NODE_CMD}" genesis collect-gentxs --home "${HOME}"
         "${COSMOS_NODE_CMD}" genesis validate --home "${HOME}"
     fi
+fi
+
+# Wait for genesis.json to be copied
+if [[ "${GENESIS_VALIDATORS_NUMBER}" -gt 1 ]]; then
+    while ! grep -q "${GENESIS_VALIDATOR_MAIN}" "${GENESIS_FILE}"; do
+        sleep 3
+        echo "Waiting for ${GENESIS_VALIDATOR_MAIN} to be found in ${GENESIS_FILE}..."
+    done
 fi
 
 exec \
