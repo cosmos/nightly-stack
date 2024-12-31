@@ -124,8 +124,19 @@ jobs:
         run: |
           set -x
           cd ${{ matrix.app.repository }}/${{ matrix.app.path }}
-          COSMOSSDK_VERSION=$(go list -m -f '{{.Version}}' github.com/cosmos/cosmos-sdk)
-          COMETBFT_VERSION=$(go list -m -f '{{.Version}}' github.com/cometbft/cometbft)
+
+          # Get Cosmos SDK version with fallback
+          COSMOSSDK_VERSION=$(go list -m -f '{{.Version}}' github.com/cosmos/cosmos-sdk 2>/dev/null || echo "unknown")
+          if [ -z "$COSMOSSDK_VERSION" ]; then
+            COSMOSSDK_VERSION="unknown"
+          fi
+
+          # Get CometBFT version with fallback
+          COMETBFT_VERSION=$(go list -m -f '{{.Version}}' github.com/cometbft/cometbft 2>/dev/null || echo "unknown")
+          if [ -z "$COMETBFT_VERSION" ]; then
+            COMETBFT_VERSION="unknown"
+          fi
+
           echo "cosmossdk=${COSMOSSDK_VERSION}" >> $GITHUB_OUTPUT
           echo "cometbft=${COMETBFT_VERSION}" >> $GITHUB_OUTPUT
 
