@@ -19,7 +19,7 @@ ${BINARY_PATH} keys add alice
 ${BINARY_PATH} keys add bob
 ${BINARY_PATH} init testchain-node --chain-id testchain
 jq '.app_state.gov.params.voting_period = "20s"' "${CONFIG_HOME}/config/genesis.json" > temp.json && mv temp.json "${CONFIG_HOME}/config/genesis.json"
-jq '.app_state.gov.params.expedited_voting_period = "300s"' "${CONFIG_HOME}/config/genesis.json" > temp.json && mv temp.json "${CONFIG_HOME}/config/genesis.json"
+jq '.app_state.gov.params.expedited_voting_period = "10s"' "${CONFIG_HOME}/config/genesis.json" > temp.json && mv temp.json "${CONFIG_HOME}/config/genesis.json"
 jq '.app_state.mint.minter.inflation = "0.300000000000000000"' "${CONFIG_HOME}/config/genesis.json" > temp.json && mv temp.json "${CONFIG_HOME}/config/genesis.json" # to change the inflation
 ${BINARY_PATH} genesis add-genesis-account alice 5000000000000stake --keyring-backend test
 ${BINARY_PATH} genesis add-genesis-account bob 5000000000000stake --keyring-backend test

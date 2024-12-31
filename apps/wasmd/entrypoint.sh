@@ -34,7 +34,7 @@ if [[ ! -f "${HOME}/config/config.toml" ]]; then
 
         # Set governance and inflation parameters
         jq '.app_state.gov.params.voting_period = "20s" |
-            .app_state.gov.params.expedited_voting_period = "300s" |
+            .app_state.gov.params.expedited_voting_period = "10s" |
             .app_state.mint.minter.inflation = "0.300000000000000000"' \
             "${GENESIS_FILE}" >temp.json && mv temp.json "${GENESIS_FILE}"
 
