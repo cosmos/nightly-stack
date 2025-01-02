@@ -8,8 +8,8 @@ TIMEOUT=60
 START_TIME=$(date +%s)
 
 cd ${MATRIX_APP_REPOSITORY}
-make init-simapp
-simd start > ./output.log 2>1 &
+make init-simapp-v2
+simdv2 start > ./output.log 2>1 &
 APP_PID=$!
 
 
@@ -25,7 +25,7 @@ while true; do
   fi
 
   # Check that 4th block is produced to validate the application
-  if simd query block-results 4; then
+  if simdv2 query comet block-results 4; then
     echo "Block #4 has been committed. Application is working correctly."
     kill $APP_PID
     exit 0
