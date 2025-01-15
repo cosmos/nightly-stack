@@ -8,8 +8,8 @@
 - **Binary:** [Download Latest Build](https://github.com/cosmos/nightly-stack/actions/workflows/nightlies-scheduled.yaml)
   - Filename: `cosmos-sdk-v2-v0.52.x-mods-<os>-<arch>`
 - **Genesis File:** `genesis.json`
-  - SHA256: `16750d970dada15961bf454a9f4615042fb04bc869441b80a5bb3cac6335d13d`
-- **Launch Date:** 2025-01-14
+  - SHA256: `a42aac752c12c2226e1a2c8356381c7348e223c91d7d5aea7bbc8db91897595f`
+- **Launch Date:** 2025-01-15
 
 ## Network Endpoints
 
@@ -18,7 +18,7 @@
 | RPC     | `https://v2-052-1-testnet-rpc.interchainsdk.io:443`                                    |
 | gRPC    | `v2-052-1-testnet-grpc.interchainsdk.io:443`                                           |
 | REST    | `https://v2-052-1-testnet-rest.interchainsdk.io:443`                                   |
-| Seed    | `d1fd4468183c75365e753d3bc64dee099a7387c5@v2-052-1-testnet-p2p.interchainsdk.io:20256` |
+| Seed    | `9b8d4ca2be751f096b34ad0cb42cfe565d2ac263@v2-052-1-testnet-p2p.interchainsdk.io:20256` |
 
 ## Join the Network
 
