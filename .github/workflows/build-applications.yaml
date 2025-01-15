@@ -472,8 +472,8 @@ jobs:
         if: |
           inputs.sendNotifications == true &&
           (
-            (env.app_status != 'true' && steps.previous-run.outputs.previous_status != 'failure') ||
-            (env.app_status == 'true' && steps.previous-run.outputs.previous_status != 'success')
+            (env.app_status != 'true' && steps.previous-run.outputs.previous_status == 'failure') ||
+            (env.app_status == 'false' && steps.previous-run.outputs.previous_status == 'success')
           )
         uses: rtCamp/action-slack-notify@c33737706dea87cd7784c687dadc9adf1be59990 # v2.3.2
         env:
