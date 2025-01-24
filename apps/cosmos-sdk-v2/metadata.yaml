@@ -3,7 +3,7 @@ app: cosmos-sdk-v2
 repository: cosmos/cosmos-sdk
 path: simapp
 publish_artifacts: true
-binary_name: simdv2
+binary_name: simd
 channels:
   - name: v0.52.x
     branch: refs/heads/release/v0.52.x
