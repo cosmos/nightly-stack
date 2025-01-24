@@ -447,27 +447,20 @@ jobs:
         run: |
           set -x
           REPO="${GITHUB_REPOSITORY}"
-          # https://api.github.com/repos/cosmos/nightly-stack/actions/workflows
           WORKFLOW_ID="119041783"
           JOB_NAME="Build Applications / Merge ${{ matrix.app.name }} ${{ matrix.app.channel }}"
 
-          # Get the previous workflow run ID (excluding the current one)
+          # Get last completed run
           PREVIOUS_RUN_ID=$(curl -s -H "Authorization: token ${{ github.token }}" \
-            "https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW_ID}/runs?per_page=2" \
-            | jq -r '.workflow_runs[1].id')
+            "https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW_ID}/runs?status=completed&per_page=1" \
+            | jq -r '.workflow_runs[0].id')
 
-          # Get the jobs for that specific run
+          # Get job conclusion with error handling
           PREVIOUS_STATUS=$(curl -s -H "Authorization: token ${{ github.token }}" \
             "https://api.github.com/repos/${REPO}/actions/runs/${PREVIOUS_RUN_ID}/jobs" \
-            | jq -r --arg JOB_NAME "$JOB_NAME" '.jobs[] | select(.name == $JOB_NAME) | .conclusion')
+            | jq -r --arg JOB_NAME "$JOB_NAME" '.jobs[] | select(.name == $JOB_NAME).conclusion // "unknown"')
 
           echo "previous_status=${PREVIOUS_STATUS}" >> $GITHUB_OUTPUT
-
-          # If PREVIOUS_STATUS is empty, set it to "unknown"
-          PREVIOUS_STATUS=${PREVIOUS_STATUS:-unknown}
-
-          echo "previous_status=${PREVIOUS_STATUS}" >> $GITHUB_OUTPUT
-
       - name: Notify Slack
         if: |
           inputs.sendNotifications == true &&
