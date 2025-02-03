@@ -15,11 +15,11 @@ RUN git clone -b upgrade_sdk_0.52 https://github.com/CosmWasm/wasmd .
 
 # See https://github.com/CosmWasm/wasmvm/releases
 # trunk-ignore(checkov/CKV_DOCKER_4)
-ADD https://github.com/CosmWasm/wasmvm/releases/download/v2.2.0-rc.2/libwasmvm_muslc.aarch64.a /lib/libwasmvm_muslc.aarch64.a
+ADD https://github.com/CosmWasm/wasmvm/releases/download/v2.2.1/libwasmvm_muslc.aarch64.a /lib/libwasmvm_muslc.aarch64.a
 # trunk-ignore(checkov/CKV_DOCKER_4)
-ADD https://github.com/CosmWasm/wasmvm/releases/download/v2.2.0-rc.2/libwasmvm_muslc.x86_64.a /lib/libwasmvm_muslc.x86_64.a
-RUN sha256sum /lib/libwasmvm_muslc.aarch64.a | grep 7af80eb7e79d82789eca0d5512a87dc20e96182590fe88ae5fd0153e31c097c9
-RUN sha256sum /lib/libwasmvm_muslc.x86_64.a | grep 2c497b5246c7217a70c447c50117c7fb09909ec23e6e4151a4de3e5f29db8134
+ADD https://github.com/CosmWasm/wasmvm/releases/download/v2.2.1/libwasmvm_muslc.x86_64.a /lib/libwasmvm_muslc.x86_64.a
+RUN sha256sum /lib/libwasmvm_muslc.aarch64.a | grep ba6cb5db6b14a265c8556326c045880908db9b1d2ffb5d4aa9f09ac09b24cecc
+RUN sha256sum /lib/libwasmvm_muslc.x86_64.a | grep b3bd755efac0ff39c01b59b8110f961c48aa3eb93588071d7a628270cc1f2326
 
 # force it to use static lib (from above) not standard libgo_cosmwasm.so file
 RUN LEDGER_ENABLED=false BUILD_TAGS=muslc LINK_STATICALLY=true make build
