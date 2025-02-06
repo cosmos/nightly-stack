@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.23-alpine3.19 AS go-builder
+FROM docker.io/library/golang:1.23-alpine3.19@sha256:5f3336882ad15d10ac1b59fbaba7cb84c35d4623774198b36ae60edeba45fd84 AS go-builder
 
 WORKDIR /code
 
