@@ -1,7 +1,7 @@
 {
   "app_name": "simd",
   "app_version": "0.0.0",
-  "genesis_time": "2025-02-17T07:15:45.119193921Z",
+  "genesis_time": "2025-02-18T07:15:45.702373529Z",
   "chain_id": "v2-052-1",
   "initial_height": 1,
   "app_hash": null,
@@ -21,28 +21,28 @@
       "accounts": [
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "cosmos169xyau7ksa5pycmk5t4tq2e0rcwgjcrtyc4vjp",
+          "address": "cosmos12v7llutcqjwgmgwjp5yvdcz5eauj38ra8yafhd",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "cosmos1572tf2hys3w2h7ev3mse68agm7e78l34075z7w",
+          "address": "cosmos1jvsrt3ph28swp38mlw28u3rulppqkstzr3gvun",
           "pub_key": null,
           "account_number": "1",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "cosmos1ctqmqsqs3chaxy2sleczlfx6acneyrjc32dpev",
+          "address": "cosmos1vlppfnuscr7gtx5xr667upnjk7y4k95r4s9de0",
           "pub_key": null,
           "account_number": "2",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "cosmos1j05k0swwx9ua4fw58mezx9dz6vl6vfanhdexu5",
+          "address": "cosmos1m99at95js3unxc8fzj4d2j9784hthv635lyq4y",
           "pub_key": null,
           "account_number": "3",
           "sequence": "0"
@@ -59,7 +59,7 @@
       },
       "balances": [
         {
-          "address": "cosmos1j05k0swwx9ua4fw58mezx9dz6vl6vfanhdexu5",
+          "address": "cosmos12v7llutcqjwgmgwjp5yvdcz5eauj38ra8yafhd",
           "coins": [
             {
               "denom": "stake",
@@ -68,7 +68,7 @@
           ]
         },
         {
-          "address": "cosmos1572tf2hys3w2h7ev3mse68agm7e78l34075z7w",
+          "address": "cosmos1vlppfnuscr7gtx5xr667upnjk7y4k95r4s9de0",
           "coins": [
             {
               "denom": "stake",
@@ -77,7 +77,7 @@
           ]
         },
         {
-          "address": "cosmos1ctqmqsqs3chaxy2sleczlfx6acneyrjc32dpev",
+          "address": "cosmos1jvsrt3ph28swp38mlw28u3rulppqkstzr3gvun",
           "coins": [
             {
               "denom": "stake",
@@ -86,7 +86,7 @@
           ]
         },
         {
-          "address": "cosmos169xyau7ksa5pycmk5t4tq2e0rcwgjcrtyc4vjp",
+          "address": "cosmos1m99at95js3unxc8fzj4d2j9784hthv635lyq4y",
           "coins": [
             {
               "denom": "stake",
@@ -196,10 +196,10 @@
                 },
                 "min_self_delegation": "1",
                 "delegator_address": "",
-                "validator_address": "cosmosvaloper169xyau7ksa5pycmk5t4tq2e0rcwgjcrtpvpe7j",
+                "validator_address": "cosmosvaloper12v7llutcqjwgmgwjp5yvdcz5eauj38razsfum7",
                 "pubkey": {
                   "@type": "/cosmos.crypto.ed25519.PubKey",
-                  "key": "Btc9sx/fZwDO8S8eppy4oNpFM7J1NHTzA7YK3W1ETqw="
+                  "key": "YcX+uksD6mkRWGZ6aSEEzQysEBATkdbjI9JMOXH31Po="
                 },
                 "value": {
                   "denom": "stake",
@@ -207,7 +207,7 @@
                 }
               }
             ],
-            "memo": "63a3e7d8d9148f3455c2758c6a9333143ba6c4dd@10.88.79.100:26656",
+            "memo": "845e3bbf0dbc9d2d266cc91b2c27dc27760f8e56@10.88.79.123:26656",
             "timeout_height": "0",
             "unordered": false,
             "timeout_timestamp": null,
@@ -219,7 +219,7 @@
               {
                 "public_key": {
                   "@type": "/cosmos.crypto.secp256k1.PubKey",
-                  "key": "AquTwxyZyCPyYuLilrSbIl6yzFtMOzjQSJwGMKc4Di6n"
+                  "key": "A+vzCdQ9ADhg/AMGR36D+f7k6tgtuZuBRBlb2/CGDbVr"
                 },
                 "mode_info": {
                   "single": {
@@ -232,13 +232,13 @@
             "fee": {
               "amount": [],
               "gas_limit": "200000",
-              "payer": "cosmos169xyau7ksa5pycmk5t4tq2e0rcwgjcrtyc4vjp",
+              "payer": "cosmos12v7llutcqjwgmgwjp5yvdcz5eauj38ra8yafhd",
               "granter": ""
             },
             "tip": null
           },
           "signatures": [
-            "xYApEZj+J84Ou9odPUdzhhUa+6ehv5yItD16mTe4L1tiXBpIfWjlZnRT0Fk4U9WBmoeSJRCa5KTQCZiFGVJrqA=="
+            "dP1le9s+wTS5BLGBYNJr4xhKd1YVElGK7lny6AXMn25uKbuoNvrujn6HNM2CdPtC3QX7A3L1cWSfSlv59fnKvQ=="
           ]
         }
       ]
