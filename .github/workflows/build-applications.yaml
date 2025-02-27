@@ -246,7 +246,7 @@ jobs:
           echo "image_name=${image_name}" >> $GITHUB_OUTPUT
           echo "outputs=${outputs}" >> $GITHUB_OUTPUT
 
-      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         if: ${{ matrix.app.publish_artifacts }}
         with:
           name: ${{ matrix.app.name }}-${{ matrix.app.channel }}-${{ matrix.app.target_os }}-${{ matrix.app.target_arch }}
@@ -339,7 +339,7 @@ jobs:
 
       - name: Download Build output
         if: ${{ !matrix.app.publish_artifacts }}
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         with:
           pattern: "wfl-build-${{ matrix.app.name }}-${{ matrix.app.channel }}-{linux,darwin}-{amd64,arm64}"
           merge-multiple: true
@@ -365,7 +365,7 @@ jobs:
 
       - name: Download Digests
         if: ${{ matrix.app.publish_artifacts }}
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         with:
           pattern: "wfl-digest-${{ matrix.app.name }}-${{ matrix.app.channel }}-{linux,darwin}-{amd64,arm64}"
           merge-multiple: true
