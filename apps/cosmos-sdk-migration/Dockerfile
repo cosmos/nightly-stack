@@ -1,4 +1,4 @@
-FROM cgr.dev/chainguard/wolfi-base:latest@sha256:5ec50de5d68fc25ca132976c4f4c29e2763749210aef0e3811281fb3a6a9031b
+FROM cgr.dev/chainguard/wolfi-base:latest@sha256:57921b0cac85ef46aab8cfbe223e9376254d4f9456e07a5c6607891897ddad8b
 
 ARG BINARY
 
